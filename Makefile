@@ -1,4 +1,4 @@
-PREFIX=/accounts/1000/shared/documents/clitools
+PREFIX=/accounts/1000/shared/clitools
 DESTDIR=$$DESTDIR
 CFLAGS=-fPIC
 
