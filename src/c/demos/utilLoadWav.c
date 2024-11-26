@@ -9,6 +9,10 @@
 #ifndef NIXTLA_UTIL_LOAD_WAV_H
 #define NIXTLA_UTIL_LOAD_WAV_H
 
+#include "nixtla-audio.h"
+#include <stdio.h>
+#include <malloc.h>
+
 int loadDataFromWavFile(const char* pathToWav, STNix_audioDesc* audioDesc, NixUI8** audioData, NixUI32* audioDataBytes){
 	int success = 0;
 	FILE* wavFile = fopen(pathToWav, "rb");

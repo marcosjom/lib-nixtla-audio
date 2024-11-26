@@ -27,7 +27,21 @@ int main(int argc, const char * argv[]){
 		NixUI16 iSourceWav = 0; NixUI16 iBufferWav = 0;
 		STNix_audioDesc audioDesc;
 		NixUI8* audioData = NULL; NixUI32 audioDataBytes;
-		const char* strWavPath = "./res/beat_stereo_16_22050.wav";
+
+		if (argc==0) {
+			printf("please provide a WAV sound filename\n");
+			exit(1);
+		}
+
+		const char* strWavPath = argv[1];
+
+		FILE* testWavFile = fopen(strWavPath, "rb");
+		if(testWavFile==NULL){
+			printf("file %s cannot be read\n");
+			exit(1);
+		}
+		fclose(testWavFile);
+
 		nixPrintCaps(&nix);
 		if(!loadDataFromWavFile(strWavPath, &audioDesc, &audioData, &audioDataBytes)){
 			printf("ERROR, loading WAV file.\n");
