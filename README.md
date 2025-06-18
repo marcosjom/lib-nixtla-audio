@@ -1,59 +1,47 @@
 #lib-nixtla-audio
-======
 
-Nixtla ("lapso de tiempo" en Nahuatl) es una librería en C para la reproducción y captura de audio que abstrae la implementación de OpenAL y OpenSL.
+Nixtla ("time lapse" in Nahuatl) is a C library for audio playback and capture that abstracts the implementation of OpenAL and OpenSL.
 
-Esta abstracción permite crear un código que pueda ser compilado y ejecutado en iOS, Android, BB10, Windows, Linux, MacOSX y otros sistemas operativos.
+This abstraction allows you to create code that can be compiled and run on iOS, Android, BB10, Windows, Linux, MacOSX, and other operating systems.
 
-#Licencia
-======
+#Licence
 
-LGPLv2.1, ver archivo LICENSE
+LGPLv2.1, see LICENSE file
 
-#Origen
-======
+#Origin
 
-Publicada el 15/mar/2014.
+Published on 15/Mar/2014.
 
-Esta librería fue inicialmente desarrollada por Marcos Ortega a partir de experiencias en el desarrollo de aplicaciones multimedia.
+This library was initially developed by Marcos Ortega based on experiences in the development of multimedia applications.
 
-#Especificaciones generales
-======
+#Features
 
-- Gestión de memoria mediante un modelo de RETAIN_COUNT (RETAIN/RELEASE).
-- Modelo de sources y buffers basado en OpenAL.
-- Modelo de callbacks basado en OpenSL.
-- Sólo dos archivos (nixtla-audio.h y nixtla-audio.c)
+- Memory management using a RETAIN_COUNT model (RETAIN/RELEASE).
+- OpenAL-based sources and buffers model.
+- OpenSL-based callback model.
+- Only two files (nixtla-audio.h and nixtla-audio.c)
 
-Adicionalmente:
+Additionally:
 
-- La gestión de memoria es customizable mediante las marcos NIX_MALLOC y NIX_FREE.
-- El punto de invocación de los callbacks es controlado por el usuario.
+- Memory management is customizable using the NIX_MALLOC and NIX_FREE macros.
+- The point of invocation of callbacks is controlled by the user.
 
-#Utilidad
-======
+#Utility
 
-Principalmente en proyectos nativos multiplataforma, incluyendo videojuegos.
+Mainly in native multiplatform projects, including video games.
 
-#Como integrar en un proyecto?
-======
+#How to integrate in your project?
 
-El diseño de nixtla prioriza la facilidad de integrar con otros proyectos mediante pasos simples como:
+Nixtla's design prioritizes ease of integration with other projects through simple steps such as:
 
-- Apuntar hacia o copiar los archivos nixtla-audio.h y nixtla-audio.c al proyecto.
-- Linkear el proyecto con OpenSL (Android) u OpenAL (iOS, BB10, windows, MacOSx, Linux y otros)
+- Point to or copy the nixtla-audio.h and nixtla-audio.c files to the project.
+- Link the project with OpenSL (Android) or OpenAL (iOS, BB10, windows, MacOSx, Linux and others)
 
-#Ejemplos y demos
-======
+#Examples and Demos
 
-Este repositorio incluye proyectos demo para los siguientes entornos:
+This repository includes demo projects for the following environments:
 
 - XCode
 - Eclipse (android)
 - Eclipse (linux)
 - Visual Sutido
-
-#Contacto
-======
-
-info@nibsa.com.ni
