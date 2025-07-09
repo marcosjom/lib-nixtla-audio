@@ -6,12 +6,12 @@
 //  Copyright (c) 2014 NIBSA. All rights reserved.
 //
 //  This entire notice must be retained in this source code.
-//  This source code is under LGLP v2.1 Licence.
+//  This source code is under MIT Licence.
 //
 //  This software is provided "as is", with absolutely no warranty expressed
 //  or implied. Any use is at your own risk.
 //
-//  Latest fixes enhancements and documentation at https://github.com/nicaraguabinary/nixtla-audio
+//  Latest fixes enhancements and documentation at https://github.com/marcosjom/lib-nixtla-audio
 //
 
 #ifndef NixtlaAudioLib_nixtla_h
@@ -41,6 +41,7 @@ typedef	unsigned short int 	NixUI16;	//NixUI16, Unsigned 16-bit integer value
 typedef	unsigned int 		NixUI32;	//NixUI32, Unsigned 32-bit integer value
 typedef	unsigned long long	NixUI64;	//NixUI64[n], Unsigned 64-bit array—n is the number of array elements
 typedef float				NixFLOAT;	//float
+typedef double              NixDOUBLE;    //double
 
 #define NIX_FALSE			0
 #define NIX_TRUE			1
@@ -64,6 +65,8 @@ typedef struct STNix_audioDesc_ {
 	NixUI16	samplerate;
 	NixUI16	blockAlign;
 } STNix_audioDesc;
+
+NixBOOL STNix_audioDesc_IsEqual(const STNix_audioDesc* obj, const STNix_audioDesc* other);
 
 //-------------------------------
 //-- ENGINES
@@ -165,6 +168,17 @@ void		nixCaptureFilledBuffersRelease(STNix_Engine* engAbs, NixUI32 quantBuffersT
 
 //Debug
 void		nixDbgPrintSourcesStatus(STNix_Engine* engAbs);
+
+//PCMFormat converter
+void*       nixFmtConverter_create(void);
+void        nixFmtConverter_destroy(void* obj);
+NixBOOL     nixFmtConverter_prepare(void* obj, const STNix_audioDesc* srcDesc, const STNix_audioDesc* dstDesc);
+NixBOOL     nixFmtConverter_setPtrAtSrcChannel(void* obj, const NixUI32 iChannel, void* ptr, const NixUI32 sampleAlign);
+NixBOOL     nixFmtConverter_setPtrAtDstChannel(void* obj, const NixUI32 iChannel, void* ptr, const NixUI32 sampleAlign);
+NixBOOL     nixFmtConverter_convert(void* obj, const NixUI32 srcBlocks, NixUI32* dstAmmBlocksWritten);
+//
+NixUI32     nixFmtConverter_maxChannels(void); //defined at compile-time
+NixUI32     nixFmtConverter_samplesForNewFrequency(const NixUI32 freqOrg, const NixUI32 freqNew, const NixUI32 ammSampesOrg);   //ammount of output samples from one frequeny to another, +1 for safety
 
 #ifdef __cplusplus
 }
