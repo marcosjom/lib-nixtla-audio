@@ -2712,7 +2712,7 @@ void* nixFmtConverter_create(void){
 void nixFmtConverter_destroy(void* pObj){
     STNix_FmtConverter* obj = (STNix_FmtConverter*)pObj;
     if(obj != NULL){
-        free(obj);
+        NIX_FREE(obj);
         obj = NULL;
     }
 }
