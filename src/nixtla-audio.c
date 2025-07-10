@@ -3485,7 +3485,7 @@ NixUI32 nixFmtConverter_maxChannels(void){
     return NIX_FMT_CONVERTER_CHANNELS_MAX;
 }
 
-NixUI32 nixFmtConverter_samplesForNewFrequency(const NixUI32 freqOrg, const NixUI32 freqNew, const NixUI32 ammSampesOrg){   //ammount of output samples from one frequeny to another, +1 for safety
+NixUI32 nixFmtConverter_samplesForNewFrequency(const NixUI32 ammSampesOrg, const NixUI32 freqOrg, const NixUI32 freqNew){   //ammount of output samples from one frequeny to another, +1 for safety
     NixUI32 r = ammSampesOrg;
     if(freqOrg < freqNew){
         //increasing freq

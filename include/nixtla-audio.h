@@ -187,7 +187,7 @@ NixBOOL     nixFmtConverter_setPtrAtDstInterlaced(void* obj, const STNix_audioDe
 NixBOOL     nixFmtConverter_convert(void* obj, const NixUI32 srcBlocks, NixUI32 dstBlocks, NixUI32* dstAmmBlocksRead, NixUI32* dstAmmBlocksWritten);
 //
 NixUI32     nixFmtConverter_maxChannels(void); //= 2, defined at compile-time
-NixUI32     nixFmtConverter_samplesForNewFrequency(const NixUI32 freqOrg, const NixUI32 freqNew, const NixUI32 ammSampesOrg);   //ammount of output samples from one frequeny to another, +1 for safety
+NixUI32     nixFmtConverter_samplesForNewFrequency(const NixUI32 ammSampesOrg, const NixUI32 freqOrg, const NixUI32 freqNew);   //ammount of output samples from one frequeny to another, +1 for safety
 
 #ifdef __cplusplus
 }

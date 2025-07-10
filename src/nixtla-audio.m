@@ -649,7 +649,7 @@ NixBOOL nixAVAudioSource_convertBuffer_(STNix_AVAudioSource* obj, STNix_AVAudioP
     if(obj->conv != NULL){
         AVAudioFormat* orgFmt = [buff->buff.org format];
         const NixUI32 capCur = [buff->buff.org frameCapacity];
-        const NixUI32 capReq = nixFmtConverter_samplesForNewFrequency([orgFmt sampleRate], [outFmt sampleRate], capCur);
+        const NixUI32 capReq = nixFmtConverter_samplesForNewFrequency(capCur, [orgFmt sampleRate], [outFmt sampleRate]);
         //release converted buffer if format or capacity do not macth requirements
         if(buff->buff.conv != nil && (![[buff->buff.conv format] isEqual:outFmt] || [buff->buff.conv frameCapacity] < capReq)){
             [buff->buff.conv release];

@@ -130,7 +130,7 @@ int main(int argc, const char * argv[]){
                             audioDescConv.channels = 1 + (rand() % 2);
                             audioDescConv.samplerate = (rand() % 10) == 0 ? audioDesc.samplerate : 800 + (rand() % 92000);
                             audioDescConv.blockAlign = (audioDescConv.bitsPerSample / 8) * audioDescConv.channels;
-                            const NixUI32 samplesReq = nixFmtConverter_samplesForNewFrequency(audioDesc.samplerate, audioDescConv.samplerate, audioDataBytes / audioDesc.blockAlign);
+                            const NixUI32 samplesReq = nixFmtConverter_samplesForNewFrequency(audioDataBytes / audioDesc.blockAlign, audioDesc.samplerate, audioDescConv.samplerate);
                             const NixUI32 bytesReq = samplesReq * audioDescConv.blockAlign;
                             if(audioDataBytesConv < bytesReq){
                                 if(audioDataConv != NULL){
