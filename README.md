@@ -78,8 +78,12 @@ int main(int argc, const char * argv[]){
         audioDesc.blockAlign    = (audioDesc.bitsPerSample / 8) * audioDesc.channels;
         const NixUI16 buffersCount = 15;
         const NixUI16 samplesPerBuffer = (audioDesc.samplerate / 10);
-        if(nixCaptureInit(&nix, &audioDesc, buffersCount, samplesPerBuffer, &bufferCapturedCallback, NULL)){
-            if(nixCaptureStart(&nix)){
+        if(!nixCaptureInit(&nix, &audioDesc, buffersCount, samplesPerBuffer, &bufferCapturedCallback, NULL)){
+            return -1;
+        } else {
+            if(!nixCaptureStart(&nix)){
+                return -1;
+            } else {
                 printf("Capturing audio...\n");
                 while(1){ //Infinite loop for this demo
                     nixTick(&nix);
@@ -107,10 +111,13 @@ This code loads a short-sound into memory and plays it in repeat:
 ...
 int main(int argc, const char * argv[]){
     STNix_Engine nix;
-    if(nixInit(&nix, 8)){
+    if(!nixInit(&nix, 8)){
+        return -1;
+    } else {
         NixUI16 iSourcePlay = 0;
         const char* strWavPath = "./res/beat_stereo_16_22050.wav";
-        NixUI8* audioData = NULL; NixUI32 audioDataBytes;
+        NixUI8* audioData = NULL;
+        NixUI32 audioDataBytes = 0;
         STNix_audioDesc audioDesc;
         if(!loadDataFromWavFile(strWavPath, &audioDesc, &audioData, &audioDataBytes)){
             return -1;
@@ -122,9 +129,9 @@ int main(int argc, const char * argv[]){
             } else {
                 NixUI16 iBufferWav = nixBufferWithData(&nix, &audioDesc, audioData, audioDataBytes);
                 if(iBufferWav == 0){
-                    //error
+                    return -1;
                 } else {
-                    if(nixSourceSetBuffer(&nix, iSourcePlay, iBufferWav)==0){
+                    if(!nixSourceSetBuffer(&nix, iSourcePlay, iBufferWav)){
                         return -1;
                     } else {
                         nixSourceSetRepeat(&nix, iSourcePlay, NIX_TRUE);
@@ -135,7 +142,7 @@ int main(int argc, const char * argv[]){
             }
         }
         //audio data is loaded into buffer
-        if(audioData!=NULL){
+        if(audioData != NULL){
             free(audioData);
             audioData = NULL;
         }
@@ -146,7 +153,7 @@ int main(int argc, const char * argv[]){
             nixTick(&nix);
             DEMO_SLEEP_MILLISEC(1000 / 30); //30 ticks per second for this demo
         }
-        //
+        //release source
         if(iSourcePlay != 0){
             nixSourceRelease(&nix, iSourcePlay);
             iSourcePlay = 0;
