@@ -1,6 +1,6 @@
 # lib-nixtla-audio
 
-Nixtla ("time lapse" in Nahuatl) is a C library for audio playback and capture that abstracts the implementation of OpenAL and OpenSL.
+Nixtla ("time lapse" in Nahuatl) is a C library for audio playback and capture that abstracts the implementation of AVFAudio, OpenAL and OpenSL.
 
 This abstraction allows you to create code that can be compiled and run on iOS, Android, BB10, Windows, Linux, MacOSX, and other operating systems.
 
