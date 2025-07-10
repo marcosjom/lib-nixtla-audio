@@ -44,11 +44,25 @@
 #   include <AL/alc.h> //remember to install "libopenal-dev" package
 #   define NIX_OPENAL
 #elif defined(__MAC_OS_X_VERSION_MAX_ALLOWED) //OSX
-#   pragma message("NIXTLA-AUDIO, COMPILING FOR MacOSX (AVFAudio)")
-#   define NIX_AVFAUDIO
+#   ifdef NIX_FORCE_OPENAL
+#       pragma message("NIXTLA-AUDIO, COMPILING FOR MacOSX (OpenAL)")
+#       include <OpenAL/al.h>
+#       include <OpenAL/alc.h>
+#       define NIX_OPENAL
+#   else
+#       pragma message("NIXTLA-AUDIO, COMPILING FOR MacOSX (AVFAudio)")
+#       define NIX_AVFAUDIO
+#   endif
 #else	//iOS?
-#   pragma message("NIXTLA-AUDIO, COMPILING FOR iOS? (AVFAudio)")
-#   define NIX_AVFAUDIO
+#   ifdef NIX_FORCE_OPENAL
+#       pragma message("NIXTLA-AUDIO, COMPILING FOR iOS? (OpenAL)")
+#       include <OpenAL/al.h>
+#       include <OpenAL/alc.h>
+#       define NIX_OPENAL
+#   else
+#       pragma message("NIXTLA-AUDIO, COMPILING FOR iOS? (AVFAudio)")
+#       define NIX_AVFAUDIO
+#   endif
 #endif
 
 //++++++++++++++++++++
@@ -168,7 +182,6 @@ typedef struct STNix_OpenSLSourceCallbackParam_ {
 typedef struct STNix_source_ {
 #   ifdef NIX_AVFAUDIO
     void*       avfSource;
-    NixBOOL     repeat;
 #   elif defined(NIX_OPENAL)
 	ALuint		idSourceAL;	//ALuint
 #   elif defined(NIX_OPENSL)
@@ -206,6 +219,9 @@ typedef struct STNix_EngineObjetcs_ {
 	NixUI32				maskCapabilities;
 #   ifdef NIX_AVFAUDIO
     void*               avfEngine;
+    void*               avfRecorder;
+    PTRNIX_CaptureBufferFilledCallback bufferCaptureCallback;
+    void*               bufferCaptureCallbackUserData;
 #   elif defined(NIX_OPENAL)
 	NixBOOL				contextALIsCurrent;
 	ALCcontext*			contextAL;				//OpenAL specific
@@ -580,6 +596,7 @@ void __nixSourceFinalize(STNix_Engine* engAbs, STNix_source* source, const NixUI
 		ALuint idFuenteAL = source->idSourceAL;
 		alSourceStop(idFuenteAL);
 		#endif
+        source->sourceState = ENNixSourceState_Stopped;
 	}
 	//Release buffer queue
 	if(source->queueBuffIndexes != NULL){
@@ -595,6 +612,7 @@ void __nixSourceFinalize(STNix_Engine* engAbs, STNix_source* source, const NixUI
 		source->releaseCallBack = NULL;
 		source->releaseCallBackUserData = NULL;
 	}
+    source->sourceType = ENNixSourceType_Undefined;
 	//Delete source
 	if(!forReuse){
         #ifdef NIX_AVFAUDIO
@@ -631,10 +649,10 @@ void __nixSourceRetain(STNix_source* source){
 void __nixSourceRelease(STNix_Engine* engAbs, STNix_source* source, const NixUI16 sourceIndex){
 	NIX_ASSERT(source->regInUse)
 	NIX_ASSERT(source->retainCount != 0)
+    if(source->retainCount == 1){
+        __nixSourceFinalize(engAbs, source, sourceIndex, source->isReusable);
+    }
 	source->retainCount--;
-	if(source->retainCount == 0){
-		__nixSourceFinalize(engAbs, source, sourceIndex, source->isReusable);
-	}
 }
 
 /*float __nixSourceSecondsInBuffers(STNix_source* src){
@@ -711,7 +729,7 @@ void __nixSrcQueueRemoveBuffersOldest(STNix_EngineObjetcs* eng, STNix_source* sr
 			alGetSourcei(src->idSourceAL, AL_BUFFERS_QUEUED, &buffersEnCola);
 			alGetSourcei(src->idSourceAL, AL_BUFFERS_PROCESSED, &buffersProcesados);
 			if(buffersEnCola != src->queueBuffIndexesUse){
-				NIX_PRINTF_ERROR("BufferCount differs, waiting(%d) real(%d, %d processed).\n", (SI32)src->queueBuffIndexesUse, (SI32)buffersEnCola, (SI32)buffersProcesados);
+				NIX_PRINTF_ERROR("BufferCount differs, waiting(%d) real(%d, %d processed).\n", (NixSI32)src->queueBuffIndexesUse, (NixSI32)buffersEnCola, (NixSI32)buffersProcesados);
 			} NIX_ASSERT(buffersEnCola == src->queueBuffIndexesUse)
 		}
 		#endif
@@ -984,7 +1002,7 @@ void nixPrintCaps(STNix_Engine* engAbs){
     //
 #   elif defined(NIX_OPENAL)
     STNix_EngineObjetcs* eng = (STNix_EngineObjetcs*)engAbs->o;
-	if(eng->contextAL == NULL){
+	if(eng->contextAL != NULL){
 		ALCint versionMayorALC, versionMenorALC;
 		const char* strAlVersion; 
 		const char* strAlRenderer;
@@ -1000,18 +1018,18 @@ void nixPrintCaps(STNix_Engine* engAbs){
 		alcGetIntegerv(eng->deviceAL, ALC_MAJOR_VERSION, sizeof(versionMayorALC), &versionMayorALC);
 		alcGetIntegerv(eng->deviceAL, ALC_MINOR_VERSION, sizeof(versionMenorALC), &versionMenorALC);
 		//
-		NIX_PRINTF_INFO("----------- OPENAL -------------\n");
-		NIX_PRINTF_INFO("Version:	      AL('%s') ALC(%d.%d):\n", strAlVersion, versionMayorALC, versionMenorALC);
-		NIX_PRINTF_INFO("Renderizador:     '%s'\n", strAlRenderer);
-		NIX_PRINTF_INFO("Vendedor:         '%s'\n", strAlVendor);
-		NIX_PRINTF_INFO("EXTCaptura:       %s\n", (eng->maskCapabilities & NIX_CAP_AUDIO_CAPTURE)?"Soportado":"NO SOPORTADO");
-		NIX_PRINTF_INFO("EXTBuffEstaticos: %s\n", (eng->maskCapabilities & NIX_CAP_AUDIO_STATIC_BUFFERS)?"Soportado":"NO SOPORTADO");
-		NIX_PRINTF_INFO("EXTOffsets:       %s\n", (eng->maskCapabilities & NIX_CAP_AUDIO_SOURCE_OFFSETS)?"Soportado":"NO SOPORTADO");
-		NIX_PRINTF_INFO("Extensiones AL:   '%s'\n", strAlExtensions);
-		NIX_PRINTF_INFO("Extensiones ALC:  '%s'\n", strAlcExtensions);
+        printf("----------- OPENAL -------------\n");
+        printf("Version:	      AL('%s') ALC(%d.%d):\n", strAlVersion, versionMayorALC, versionMenorALC);
+        printf("Renderizador:     '%s'\n", strAlRenderer);
+        printf("Vendedor:         '%s'\n", strAlVendor);
+        printf("EXTCaptura:       %s\n", (eng->maskCapabilities & NIX_CAP_AUDIO_CAPTURE)?"supported":"unsupported");
+        printf("EXTBuffEstaticos: %s\n", (eng->maskCapabilities & NIX_CAP_AUDIO_STATIC_BUFFERS)?"supported":"unsupported");
+        printf("EXTOffsets:       %s\n", (eng->maskCapabilities & NIX_CAP_AUDIO_SOURCE_OFFSETS)?"supported":"unsupported");
+        printf("Extensions AL:    '%s'\n", strAlExtensions);
+        printf("Extensions ALC:   '%s'\n", strAlcExtensions);
 		//List sound devices
 		defDeviceName = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER); NIX_OPENAL_ERR_VERIFY("alcGetString(ALC_DEFAULT_DEVICE_SPECIFIER)")
-		NIX_PRINTF_INFO("DefautlDevice:  '%s'\n", defDeviceName);
+        printf("DefautlDevice:  '%s'\n", defDeviceName);
 		{
 			NixSI32 pos = 0, deviceCount = 0;
 			const ALCchar* deviceList = alcGetString(NULL, ALC_DEVICE_SPECIFIER); NIX_OPENAL_ERR_VERIFY("alcGetString(ALC_DEVICE_SPECIFIER)")
@@ -1019,14 +1037,14 @@ void nixPrintCaps(STNix_Engine* engAbs){
 				const char* strDevice = &(deviceList[pos]); NixUI32 strSize = 0;
 				while(strDevice[strSize]!='\0') strSize++;
 				pos += strSize + 1; deviceCount++;
-				NIX_PRINTF_INFO("Device #%d:  '%s'\n", deviceCount, strDevice);
+                printf("Device #%d:  '%s'\n", deviceCount, strDevice);
 			}
 		}
 		//List capture devices
 		if(eng->maskCapabilities & NIX_CAP_AUDIO_CAPTURE){
 			#if !defined(NIX_SILENT_MODE) && defined(NIX_VERBOSE_MODE)
 			const char* defCaptureDeviceName = alcGetString(NULL, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER); NIX_OPENAL_ERR_VERIFY("alcGetString(ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER)")
-			NIX_PRINTF_INFO("DefautlCapture:  '%s'\n", defCaptureDeviceName);
+            printf("DefautlCapture:  '%s'\n", defCaptureDeviceName);
 			#endif
 			{
 				NixSI32 pos = 0, deviceCount = 0;
@@ -1035,7 +1053,7 @@ void nixPrintCaps(STNix_Engine* engAbs){
 					const char* strDevice = &(deviceList[pos]); NixUI32 strSize = 0;
 					while(strDevice[strSize]!='\0') strSize++;
 					pos += strSize + 1; deviceCount++;
-					NIX_PRINTF_INFO("Capture #%d:  '%s'\n", deviceCount, strDevice);
+					printf("Capture #%d:  '%s'\n", deviceCount, strDevice);
 				}
 			}
 		}
@@ -1193,7 +1211,9 @@ void nixTick(STNix_Engine* engAbs){
 #	endif
 	//
 #   ifdef NIX_AVFAUDIO
-    //
+    if(eng->avfRecorder != NULL){
+        nixAVAudioRecorder_notifyBuffers(eng->avfRecorder, engAbs, eng->bufferCaptureCallback, eng->bufferCaptureCallbackUserData);
+    }
 #	elif defined(NIX_OPENAL)
 	if(eng->deviceCaptureAL){
 		__nixCaptureOpenALMoveSamplesToBuffers(engAbs); //OpenAL specific
@@ -1391,7 +1411,7 @@ void nixSourceSetRepeat(STNix_Engine* engAbs, const NixUI16 sourceIndex, const N
 	STNix_EngineObjetcs* eng = (STNix_EngineObjetcs*)engAbs->o;
 	NIX_GET_SOURCE_START(eng, sourceIndex, source){
         #ifdef NIX_AVFAUDIO
-        source->repeat  = repeat;
+        nixAVAudioSource_setRepeat(source->avfSource, repeat);
 		#elif defined(NIX_OPENAL)
 		alSourcei(source->idSourceAL, AL_LOOPING, repeat?AL_TRUE:AL_FALSE); NIX_OPENAL_ERR_VERIFY("alSourcei(AL_LOOPING)");
 		#elif defined(NIX_OPENSL)
@@ -2375,10 +2395,24 @@ void __nixCaptureOpenSLConsumeFilledBuffers(STNix_Engine* engAbs){
 #endif
 
 NixBOOL nixCaptureInit(STNix_Engine* engAbs, const STNix_audioDesc* audioDesc, const NixUI16 buffersCount, const NixUI16 samplesPerBuffer, PTRNIX_CaptureBufferFilledCallback bufferCaptureCallback, void* bufferCaptureCallbackUserData){
+    NixBOOL r = NIX_FALSE;
 	STNix_EngineObjetcs* eng = (STNix_EngineObjetcs*)engAbs->o;
 	NIX_PRINTF_INFO("CaptureInit with channels(%d) bitsPerSample(%d) samplerate(%d) blockAlign(%d).\n", audioDesc->channels, audioDesc->bitsPerSample, audioDesc->samplerate, audioDesc->blockAlign);
 #   ifdef NIX_AVFAUDIO
-    //ToDo: implement
+    if(eng->avfRecorder == NULL && buffersCount != 0 && samplesPerBuffer != 0){
+        void* recorder = nixAVAudioRecorder_create(eng->avfEngine, audioDesc, buffersCount, samplesPerBuffer);
+        if(recorder != NULL){
+            eng->avfRecorder = recorder; recorder = NULL; //consume
+            eng->bufferCaptureCallback = bufferCaptureCallback;
+            eng->bufferCaptureCallbackUserData = bufferCaptureCallbackUserData;
+            r = NIX_TRUE;
+        }
+        //release (if not consumed)
+        if(recorder != NULL){
+            nixAVAudioRecorder_destroy(recorder);
+            recorder = NULL;
+        }
+    }
 #   elif defined(NIX_OPENAL)
 	if(eng->deviceCaptureAL == NULL && buffersCount != 0 && samplesPerBuffer != 0){
 		const ALenum dataFormat = NIX_OPENAL_AUDIO_FORMAT(audioDesc->channels, audioDesc->bitsPerSample);
@@ -2403,19 +2437,19 @@ NixBOOL nixCaptureInit(STNix_Engine* engAbs, const STNix_audioDesc* audioDesc, c
 					eng->buffersCaptureArrSize = 0;
 				}
 				//Create capture buffers
-				bytesPerBuffer					= (audioDesc->bitsPerSample / 8) * audioDesc->channels * samplesPerBuffer;
-				eng->buffersCaptureArrFirst	= 0;
+				bytesPerBuffer                  = (audioDesc->bitsPerSample / 8) * audioDesc->channels * samplesPerBuffer;
+				eng->buffersCaptureArrFirst     = 0;
 				eng->buffersCaptureArrFilledCount = 0;
-				eng->buffersCaptureArrSize		= buffersCount;
+				eng->buffersCaptureArrSize      = buffersCount;
                 NIX_MALLOC(eng->buffersCaptureArr, STNix_bufferDesc, sizeof(STNix_bufferDesc) * buffersCount, "buffersCaptureArr");
 				eng->buffersCaptureCallback	= bufferCaptureCallback;
 				eng->buffersCaptureCallbackUserData = bufferCaptureCallbackUserData;
 				for(i=0; i < buffersCount; i++){
-					STNix_bufferDesc* buff = &eng->buffersCaptureArr[i];
-					buff->dataBytesCount			= bytesPerBuffer;
+					STNix_bufferDesc* buff      = &eng->buffersCaptureArr[i];
+					buff->dataBytesCount		= bytesPerBuffer;
                     NIX_MALLOC(buff->dataPointer, NixUI8, sizeof(NixUI8) * bytesPerBuffer, "buffCap.dataPointer");
-					buff->state		= ENNixBufferState_Free;
-					buff->audioDesc	= *audioDesc;
+					buff->state		            = ENNixBufferState_Free;
+					buff->audioDesc	            = *audioDesc;
 				}
 				return NIX_TRUE;
 			}
@@ -2506,14 +2540,18 @@ NixBOOL nixCaptureInit(STNix_Engine* engAbs, const STNix_audioDesc* audioDesc, c
 		}
 	}
 #   endif
-	return NIX_FALSE;
+	return r;
 }
 
 void nixCaptureFinalize(STNix_Engine* engAbs){
 	STNix_EngineObjetcs* eng = (STNix_EngineObjetcs*)engAbs->o;
 	//Destroy capture device
 #   ifdef NIX_AVFAUDIO
-    //ToDo: implement
+    if(eng->avfRecorder != NULL){
+        nixAVAudioRecorder_stop(eng->avfRecorder);
+        nixAVAudioRecorder_destroy(eng->avfRecorder);
+        eng->avfRecorder = NULL;
+    }
 #   elif defined(NIX_OPENAL)
 	if(eng->deviceCaptureAL != NULL){
 		alcCaptureStop(eng->deviceCaptureAL); NIX_OPENAL_ERR_VERIFY("alcCaptureStop");
@@ -2552,7 +2590,14 @@ NixBOOL nixCaptureIsOnProgress(STNix_Engine* engAbs){
 NixBOOL nixCaptureStart(STNix_Engine* engAbs){
 	STNix_EngineObjetcs* eng = (STNix_EngineObjetcs*)engAbs->o;
 #   ifdef NIX_AVFAUDIO
-    //ToDo: implement
+    if(eng->avfRecorder != NULL){
+        if(!nixAVAudioRecorder_start(eng->avfRecorder)){
+            NIX_PRINTF_ERROR("Could not start audio capture,nixAVAudioRecorder_start failed.\n");
+        } else {
+            eng->captureInProgess = NIX_TRUE;
+            return NIX_TRUE;
+        }
+    }
 #   elif defined(NIX_OPENAL)
 	if(eng->deviceCaptureAL != NULL /*&& !eng->captureInProgess*/){
 		ALenum error;
@@ -2581,7 +2626,13 @@ NixBOOL nixCaptureStart(STNix_Engine* engAbs){
 void nixCaptureStop(STNix_Engine* engAbs){
 	STNix_EngineObjetcs* eng = (STNix_EngineObjetcs*)engAbs->o;
 #   ifdef NIX_AVFAUDIO
-    //ToDo: implement
+    if(eng->avfRecorder != NULL){
+        if(!nixAVAudioRecorder_stop(eng->avfRecorder)){
+            NIX_PRINTF_ERROR("Could not start audio capture,nixAVAudioRecorder_stop failed.\n");
+        } else {
+            eng->captureInProgess = NIX_FALSE;
+        }
+    }
 #   elif defined(NIX_OPENAL)
 	if(eng->deviceCaptureAL != NULL){
 		alcCaptureStop(eng->deviceCaptureAL);
@@ -2672,8 +2723,8 @@ void __nixCaptureOpenALMoveSamplesToBuffers(STNix_Engine* engAbs){
 }
 #endif
 
-
-#define NIX_FMT_CONVERTER_MAX_CHANNELS  2
+#define NIX_FMT_CONVERTER_FREQ_PRECISION    512 //fixed point-denominator
+#define NIX_FMT_CONVERTER_CHANNELS_MAX      2
 
 //PCMFormat converter
 
@@ -2684,7 +2735,7 @@ typedef struct STNix_FmtConverterChannel_ {
 
 typedef struct STNix_FmtConverterSide_ {
     STNix_audioDesc             desc;
-    STNix_FmtConverterChannel   channels[NIX_FMT_CONVERTER_MAX_CHANNELS];
+    STNix_FmtConverterChannel   channels[NIX_FMT_CONVERTER_CHANNELS_MAX];
 } STNix_FmtConverterSide;
 
 typedef struct STNix_FmtConverter_ {
@@ -2692,19 +2743,20 @@ typedef struct STNix_FmtConverter_ {
     STNix_FmtConverterSide dst;
     //accum
     struct {
+        NixUI32 fixed;
         NixUI32 count;
         //accumulated values
         union {
-            NixFLOAT accumFloat;
-            NixSI64  accumSI64;
-            NixSI32  accumSI32;
+            NixFLOAT accumFloat[NIX_FMT_CONVERTER_CHANNELS_MAX];
+            NixSI64  accumSI64[NIX_FMT_CONVERTER_CHANNELS_MAX];
+            NixSI32  accumSI32[NIX_FMT_CONVERTER_CHANNELS_MAX];
         };
-    } sampesAccum;
+    } samplesAccum;
 } STNix_FmtConverter;
 
 void* nixFmtConverter_create(void){
     STNix_FmtConverter* r = NULL;
-    NIX_MALLOC(r, STNix_FmtConverter, sizeof(STNix_FmtConverter), "STNix_FmtConverter")
+    NIX_MALLOC(r, STNix_FmtConverter, sizeof(STNix_FmtConverter), "STNix_FmtConverter");
     memset(r, 0, sizeof(STNix_FmtConverter));
     return r;
 }
@@ -2764,23 +2816,59 @@ NixBOOL nixFmtConverter_setPtrAtDstChannel(void* pObj, const NixUI32 iChannel, v
     return r;
 }
 
-NixBOOL nixFmtConverter_convertSameFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32* dstAmmBlocksWritten);
-NixBOOL nixFmtConverter_convertIncFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32* dstAmmBlocksWritten);
-NixBOOL nixFmtConverter_convertDecFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32* dstAmmBlocksWritten);
+NixBOOL nixFmtConverter_setPtrAtSrcInterlaced(void* pObj, const STNix_audioDesc* desc, void* ptr, const NixUI32 iFirstSample){
+    NixBOOL r = NIX_FALSE;
+    STNix_FmtConverter* obj = (STNix_FmtConverter*)pObj;
+    if(obj != NULL && desc != NULL){
+        r = NIX_TRUE;
+        NixUI32 iCh, chCountDst = desc->channels;
+        for(iCh = 0; iCh < chCountDst && iCh < NIX_FMT_CONVERTER_CHANNELS_MAX; ++iCh){
+            const NixUI32 samplePos = (iFirstSample * desc->blockAlign);
+            const NixUI32 sampleChannelPos = samplePos + ((desc->bitsPerSample / 8) * iCh);
+            if(!nixFmtConverter_setPtrAtSrcChannel(pObj, iCh, &(((NixBYTE*)ptr)[sampleChannelPos]), desc->blockAlign)){
+                r = NIX_FALSE;
+                break;
+            }
+        }
+    }
+    return r;
+}
 
-NixBOOL nixFmtConverter_convert(void* pObj, const NixUI32 srcBlocks, NixUI32* dstAmmBlocksWritten){
+NixBOOL nixFmtConverter_setPtrAtDstInterlaced(void* pObj, const STNix_audioDesc* desc, void* ptr, const NixUI32 iFirstSample){
+    NixBOOL r = NIX_FALSE;
+    STNix_FmtConverter* obj = (STNix_FmtConverter*)pObj;
+    if(obj != NULL && desc != NULL){
+        r = NIX_TRUE;
+        NixUI32 iCh, chCountDst = desc->channels;
+        for(iCh = 0; iCh < chCountDst && iCh < NIX_FMT_CONVERTER_CHANNELS_MAX; ++iCh){
+            const NixUI32 samplePos = (iFirstSample * desc->blockAlign);
+            const NixUI32 sampleChannelPos = samplePos + ((desc->bitsPerSample / 8) * iCh);
+            if(!nixFmtConverter_setPtrAtDstChannel(pObj, iCh, &(((NixBYTE*)ptr)[sampleChannelPos]), desc->blockAlign)){
+                r = NIX_FALSE;
+                break;
+            }
+        }
+    }
+    return r;
+}
+
+NixBOOL nixFmtConverter_convertSameFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32 dstBlocks, NixUI32* dstAmmBlocksRead, NixUI32* dstAmmBlocksWritten);
+NixBOOL nixFmtConverter_convertIncFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32 dstBlocks, NixUI32* dstAmmBlocksRead, NixUI32* dstAmmBlocksWritten);
+NixBOOL nixFmtConverter_convertDecFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32 dstBlocks, NixUI32* dstAmmBlocksRead, NixUI32* dstAmmBlocksWritten);
+
+NixBOOL nixFmtConverter_convert(void* pObj, const NixUI32 srcBlocks, NixUI32 dstBlocks, NixUI32* dstAmmBlocksRead, NixUI32* dstAmmBlocksWritten){
     NixBOOL r = NIX_FALSE;
     STNix_FmtConverter* obj = (STNix_FmtConverter*)pObj;
     if(obj != NULL){
         if(obj->src.desc.samplerate == obj->dst.desc.samplerate){
             //same freq
-            r = nixFmtConverter_convertSameFreq_(obj, srcBlocks, dstAmmBlocksWritten);
+            r = nixFmtConverter_convertSameFreq_(obj, srcBlocks, dstBlocks, dstAmmBlocksRead, dstAmmBlocksWritten);
         } else if(obj->src.desc.samplerate < obj->dst.desc.samplerate){
             //increasing freq
-            r = nixFmtConverter_convertIncFreq_(obj, srcBlocks, dstAmmBlocksWritten);
+            r = nixFmtConverter_convertIncFreq_(obj, srcBlocks, dstBlocks, dstAmmBlocksRead, dstAmmBlocksWritten);
         } else {
             //decreasing freq
-            r = nixFmtConverter_convertDecFreq_(obj, srcBlocks, dstAmmBlocksWritten);
+            r = nixFmtConverter_convertDecFreq_(obj, srcBlocks, dstBlocks, dstAmmBlocksRead, dstAmmBlocksWritten);
         }
     }
     return r;
@@ -2796,11 +2884,13 @@ NixBOOL nixFmtConverter_convert(void* pObj, const NixUI32 srcBlocks, NixUI32* ds
     STNix_FmtConverterChannel* dstCh0 = &obj->dst.channels[0]; \
     NixBYTE *src0 = (NixBYTE*)srcCh0->ptr; NixUI32 srcAlign0 = srcCh0->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
         *(LEFT_TYPE*)dst0 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
         src0 += srcAlign0; \
         dst0 += dstAlign0; \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
@@ -2813,7 +2903,8 @@ NixBOOL nixFmtConverter_convert(void* pObj, const NixUI32 srcBlocks, NixUI32* ds
     NixBYTE *src1 = (NixBYTE*)srcCh1->ptr; NixUI32 srcAlign1 = srcCh1->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
     NixBYTE *dst1 = (NixBYTE*)dstCh1->ptr; NixUI32 dstAlign1 = dstCh1->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
         *(LEFT_TYPE*)dst0 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
         *(LEFT_TYPE*)dst1 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src1) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
         src0 += srcAlign0; \
@@ -2821,6 +2912,7 @@ NixBOOL nixFmtConverter_convert(void* pObj, const NixUI32 srcBlocks, NixUI32* ds
         dst0 += dstAlign0; \
         dst1 += dstAlign1; \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
@@ -2831,12 +2923,14 @@ NixBOOL nixFmtConverter_convert(void* pObj, const NixUI32 srcBlocks, NixUI32* ds
     NixBYTE *src0 = (NixBYTE*)srcCh0->ptr; NixUI32 srcAlign0 = srcCh0->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
     NixBYTE *dst1 = (NixBYTE*)dstCh1->ptr; NixUI32 dstAlign1 = dstCh1->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
         *(LEFT_TYPE*)dst0 = *(LEFT_TYPE*)dst1 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
         src0 += srcAlign0; \
         dst0 += dstAlign0; \
         dst1 += dstAlign1; \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
@@ -2847,16 +2941,18 @@ NixBOOL nixFmtConverter_convert(void* pObj, const NixUI32 srcBlocks, NixUI32* ds
     NixBYTE *src0 = (NixBYTE*)srcCh0->ptr; NixUI32 srcAlign0 = srcCh0->sampleAlign; \
     NixBYTE *src1 = (NixBYTE*)srcCh1->ptr; NixUI32 srcAlign1 = srcCh1->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
-        *(LEFT_TYPE*)dst0 = (LEFT_TYPE) ((((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2) + (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src1) RIGHT_MATH_OP1) RIGHT_MATH_OP2)) / DIV_2_WITH_SUFIX; \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
+        *(LEFT_TYPE*)dst0 = (LEFT_TYPE) (((((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2) + (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src1) RIGHT_MATH_OP1) RIGHT_MATH_OP2)) / DIV_2_WITH_SUFIX); \
         src0 += srcAlign0; \
         src1 += srcAlign1; \
         dst0 += dstAlign0; \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
-NixBOOL nixFmtConverter_convertSameFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32* dstAmmBlocksWritten){
+NixBOOL nixFmtConverter_convertSameFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32 dstBlocks, NixUI32* dstAmmBlocksRead, NixUI32* dstAmmBlocksWritten){
     NixBOOL r = NIX_FALSE;
     NixUI32 i = 0;
     if(obj->src.desc.channels == 1 && obj->dst.desc.channels == 1){
@@ -2943,7 +3039,7 @@ NixBOOL nixFmtConverter_convertSameFreq_(STNix_FmtConverter* obj, const NixUI32 
         } else if(FMT_CONVERTER_IS_SI16(obj->dst.desc)){        //to SI16
             if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_SAME_FREQ_2_TO_1_CH(NixSI16, NixFLOAT, , , * 32767.f, 2.f); }
             else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_SAME_FREQ_2_TO_1_CH(NixSI16, NixSI32, , , / (0x7FFFFFFF / 0x7FFF), 2); }
-            else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_SAME_FREQ_2_TO_1_CH(NixSI16, NixSI16, , , , 2); }
+            else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_SAME_FREQ_2_TO_1_CH(NixSI16, NixSI16, (NixSI32), , , 2); }
             else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_SAME_FREQ_2_TO_1_CH(NixSI16, NixUI8, (NixSI32), - 127, * (0x7FFF / 0x80), 2); }
         } else if(FMT_CONVERTER_IS_UI8(obj->dst.desc)){         //to UI8
             if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_SAME_FREQ_2_TO_1_CH(NixUI8, NixFLOAT, , + 1.f, * 127.f, 2.f); }
@@ -2960,16 +3056,19 @@ NixBOOL nixFmtConverter_convertSameFreq_(STNix_FmtConverter* obj, const NixUI32 
     STNix_FmtConverterChannel* dstCh0 = &obj->dst.channels[0]; \
     NixBYTE *src0 = (NixBYTE*)srcCh0->ptr; NixUI32 srcAlign0 = srcCh0->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
         *(LEFT_TYPE*)dst0 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
-        obj->sampesAccum.count = (obj->sampesAccum.count + 1) % repeatSampleEach; \
-        if(obj->sampesAccum.count == 0){ \
-            *(LEFT_TYPE*)(dst0 + dstAlign0) = *(LEFT_TYPE*)dst0; \
-            dst0 += dstAlign0; \
-        } \
         src0 += srcAlign0; \
         dst0 += dstAlign0; \
+        obj->samplesAccum.fixed += repeatPerOrgSample; \
+        while(obj->samplesAccum.fixed >= NIX_FMT_CONVERTER_FREQ_PRECISION && dst0 < dst0AfterEnd){ \
+            obj->samplesAccum.fixed -= NIX_FMT_CONVERTER_FREQ_PRECISION; \
+            *(LEFT_TYPE*)dst0 = *(LEFT_TYPE*)(dst0 - dstAlign0); \
+            dst0 += dstAlign0; \
+        } \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
@@ -2982,21 +3081,24 @@ NixBOOL nixFmtConverter_convertSameFreq_(STNix_FmtConverter* obj, const NixUI32 
     NixBYTE *src1 = (NixBYTE*)srcCh1->ptr; NixUI32 srcAlign1 = srcCh1->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
     NixBYTE *dst1 = (NixBYTE*)dstCh1->ptr; NixUI32 dstAlign1 = dstCh1->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
         *(LEFT_TYPE*)dst0 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
         *(LEFT_TYPE*)dst1 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src1) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
-        obj->sampesAccum.count = (obj->sampesAccum.count + 1) % repeatSampleEach; \
-        if(obj->sampesAccum.count == 0){ \
-            *(LEFT_TYPE*)(dst0 + dstAlign0) = *(LEFT_TYPE*)dst0; \
-            *(LEFT_TYPE*)(dst1 + dstAlign1) = *(LEFT_TYPE*)dst1; \
-            dst0 += dstAlign0; \
-            dst1 += dstAlign1; \
-        } \
         src0 += srcAlign0; \
         src1 += srcAlign1; \
         dst0 += dstAlign0; \
         dst1 += dstAlign1; \
+        obj->samplesAccum.fixed += repeatPerOrgSample; \
+        while(obj->samplesAccum.fixed >= NIX_FMT_CONVERTER_FREQ_PRECISION && dst0 < dst0AfterEnd){ \
+            obj->samplesAccum.fixed -= NIX_FMT_CONVERTER_FREQ_PRECISION; \
+            *(LEFT_TYPE*)dst0 = *(LEFT_TYPE*)(dst0 - dstAlign0); \
+            *(LEFT_TYPE*)dst1 = *(LEFT_TYPE*)(dst1 - dstAlign1); \
+            dst0 += dstAlign0; \
+            dst1 += dstAlign1; \
+        } \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
@@ -3007,18 +3109,21 @@ NixBOOL nixFmtConverter_convertSameFreq_(STNix_FmtConverter* obj, const NixUI32 
     NixBYTE *src0 = (NixBYTE*)srcCh0->ptr; NixUI32 srcAlign0 = srcCh0->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
     NixBYTE *dst1 = (NixBYTE*)dstCh1->ptr; NixUI32 dstAlign1 = dstCh1->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
         *(LEFT_TYPE*)dst0 = *(LEFT_TYPE*)dst1 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
-        obj->sampesAccum.count = (obj->sampesAccum.count + 1) % repeatSampleEach; \
-        if(obj->sampesAccum.count == 0){ \
-            *(LEFT_TYPE*)(dst0 + dstAlign0) = *(LEFT_TYPE*)(dst1 + dstAlign1) = *(LEFT_TYPE*)dst0; \
-            dst0 += dstAlign0; \
-            dst1 += dstAlign1; \
-        } \
         src0 += srcAlign0; \
         dst0 += dstAlign0; \
         dst1 += dstAlign1; \
+        obj->samplesAccum.fixed += repeatPerOrgSample; \
+        while(obj->samplesAccum.fixed >= NIX_FMT_CONVERTER_FREQ_PRECISION && dst0 < dst0AfterEnd){ \
+            obj->samplesAccum.fixed -= NIX_FMT_CONVERTER_FREQ_PRECISION; \
+            *(LEFT_TYPE*)dst0 = *(LEFT_TYPE*)dst1 = *(LEFT_TYPE*)(dst0 - dstAlign0); \
+            dst0 += dstAlign0; \
+            dst1 += dstAlign1; \
+        } \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
@@ -3029,26 +3134,32 @@ NixBOOL nixFmtConverter_convertSameFreq_(STNix_FmtConverter* obj, const NixUI32 
     NixBYTE *src0 = (NixBYTE*)srcCh0->ptr; NixUI32 srcAlign0 = srcCh0->sampleAlign; \
     NixBYTE *src1 = (NixBYTE*)srcCh1->ptr; NixUI32 srcAlign1 = srcCh1->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
-        *(LEFT_TYPE*)dst0 = (LEFT_TYPE) ((((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2) + (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src1) RIGHT_MATH_OP1) RIGHT_MATH_OP2)) / DIV_2_WITH_SUFIX; \
-        obj->sampesAccum.count = (obj->sampesAccum.count + 1) % repeatSampleEach; \
-        if(obj->sampesAccum.count == 0){ \
-            *(LEFT_TYPE*)(dst0 + dstAlign0) = *(LEFT_TYPE*)dst0; \
-            dst0 += dstAlign0; \
-        } \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
+        *(LEFT_TYPE*)dst0 = (LEFT_TYPE) (((((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2) + (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src1) RIGHT_MATH_OP1) RIGHT_MATH_OP2)) / DIV_2_WITH_SUFIX); \
         src0 += srcAlign0; \
         src1 += srcAlign1; \
         dst0 += dstAlign0; \
+        obj->samplesAccum.fixed += repeatPerOrgSample; \
+        while(obj->samplesAccum.fixed >= NIX_FMT_CONVERTER_FREQ_PRECISION && dst0 < dst0AfterEnd){ \
+            obj->samplesAccum.fixed -= NIX_FMT_CONVERTER_FREQ_PRECISION; \
+            *(LEFT_TYPE*)dst0 = *(LEFT_TYPE*)(dst0 - dstAlign0); \
+            dst0 += dstAlign0; \
+        } \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
-NixBOOL nixFmtConverter_convertIncFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32* dstAmmBlocksWritten){
+NixBOOL nixFmtConverter_convertIncFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32 dstBlocks, NixUI32* dstAmmBlocksRead, NixUI32* dstAmmBlocksWritten){
     NixBOOL r = NIX_FALSE;
     //increasing freq
     const NixUI32 delta = (obj->dst.desc.samplerate - obj->src.desc.samplerate);
-    const NixUI32 repeatSampleEach = (obj->src.desc.samplerate + delta - 1) / delta;
-    if(repeatSampleEach > 0){
+    const NixUI32 repeatPerOrgSample = delta * NIX_FMT_CONVERTER_FREQ_PRECISION / obj->src.desc.samplerate;
+    if(repeatPerOrgSample == 0){
+        //freq difference is below 'NIX_FMT_CONVERTER_FREQ_PRECISION', just ignore
+        r = nixFmtConverter_convertSameFreq_(obj, srcBlocks, dstBlocks, dstAmmBlocksRead, dstAmmBlocksWritten);
+    } else {
         NixUI32 i = 0;
         if(obj->src.desc.channels == 1 && obj->dst.desc.channels == 1){
             //same 1-channel
@@ -3147,27 +3258,32 @@ NixBOOL nixFmtConverter_convertIncFreq_(STNix_FmtConverter* obj, const NixUI32 s
     return r;
 }
 
-//ToDo: implement
-/*
-#define FMT_CONVERTER_DEC_FREQ_1_CH(LEFT_TYPE, RIGHT_TYPE, RIGHT_MATH_CAST, RIGHT_MATH_OP1, RIGHT_MATH_OP2) \
+#define FMT_CONVERTER_DEC_FREQ_1_CH(LEFT_TYPE, RIGHT_TYPE, RIGHT_MATH_CAST, RIGHT_MATH_OP1, RIGHT_MATH_OP2, ACCUM_VAR_NAME) \
     STNix_FmtConverterChannel* srcCh0 = &obj->src.channels[0]; \
     STNix_FmtConverterChannel* dstCh0 = &obj->dst.channels[0]; \
     NixBYTE *src0 = (NixBYTE*)srcCh0->ptr; NixUI32 srcAlign0 = srcCh0->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
-        *(LEFT_TYPE*)dst0 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
-        obj->sampesAccum.count = (obj->sampesAccum.count + 1) % repeatSampleEach; \
-        if(obj->sampesAccum.count == 0){ \
-            *(LEFT_TYPE*)(dst0 + dstAlign0) = *(LEFT_TYPE*)dst0; \
-            dst0 += dstAlign0; \
-        } \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
+        obj->samplesAccum.ACCUM_VAR_NAME[0] += (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
+        obj->samplesAccum.count++; \
+        obj->samplesAccum.fixed += accumPerOrgSample; \
         src0 += srcAlign0; \
-        dst0 += dstAlign0; \
+        while(obj->samplesAccum.fixed >= NIX_FMT_CONVERTER_FREQ_PRECISION && dst0 < dst0AfterEnd){ \
+            obj->samplesAccum.fixed -= NIX_FMT_CONVERTER_FREQ_PRECISION; \
+            *(LEFT_TYPE*)dst0 = (LEFT_TYPE)(obj->samplesAccum.ACCUM_VAR_NAME[0] / obj->samplesAccum.count); \
+            dst0 += dstAlign0; \
+            if(obj->samplesAccum.fixed < NIX_FMT_CONVERTER_FREQ_PRECISION){ \
+                obj->samplesAccum.ACCUM_VAR_NAME[0] = 0; \
+                obj->samplesAccum.count = 0; \
+            } \
+        } \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
-#define FMT_CONVERTER_DEC_FREQ_2_CH(LEFT_TYPE, RIGHT_TYPE, RIGHT_MATH_CAST, RIGHT_MATH_OP1, RIGHT_MATH_OP2) \
+#define FMT_CONVERTER_DEC_FREQ_2_CH(LEFT_TYPE, RIGHT_TYPE, RIGHT_MATH_CAST, RIGHT_MATH_OP1, RIGHT_MATH_OP2, ACCUM_VAR_NAME) \
     STNix_FmtConverterChannel* srcCh0 = &obj->src.channels[0]; \
     STNix_FmtConverterChannel* dstCh0 = &obj->dst.channels[0]; \
     STNix_FmtConverterChannel* srcCh1 = &obj->src.channels[1]; \
@@ -3176,168 +3292,189 @@ NixBOOL nixFmtConverter_convertIncFreq_(STNix_FmtConverter* obj, const NixUI32 s
     NixBYTE *src1 = (NixBYTE*)srcCh1->ptr; NixUI32 srcAlign1 = srcCh1->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
     NixBYTE *dst1 = (NixBYTE*)dstCh1->ptr; NixUI32 dstAlign1 = dstCh1->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
-        *(LEFT_TYPE*)dst0 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
-        *(LEFT_TYPE*)dst1 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src1) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
-        obj->sampesAccum.count = (obj->sampesAccum.count + 1) % repeatSampleEach; \
-        if(obj->sampesAccum.count == 0){ \
-            *(LEFT_TYPE*)(dst0 + dstAlign0) = *(LEFT_TYPE*)dst0; \
-            *(LEFT_TYPE*)(dst1 + dstAlign1) = *(LEFT_TYPE*)dst1; \
-            dst0 += dstAlign0; \
-            dst1 += dstAlign1; \
-        } \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
+        obj->samplesAccum.ACCUM_VAR_NAME[0] += (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
+        obj->samplesAccum.ACCUM_VAR_NAME[1] += (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src1) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
+        obj->samplesAccum.count++; \
+        obj->samplesAccum.fixed += accumPerOrgSample; \
         src0 += srcAlign0; \
         src1 += srcAlign1; \
-        dst0 += dstAlign0; \
-        dst1 += dstAlign1; \
+        while(obj->samplesAccum.fixed >= NIX_FMT_CONVERTER_FREQ_PRECISION && dst0 < dst0AfterEnd){ \
+            obj->samplesAccum.fixed -= NIX_FMT_CONVERTER_FREQ_PRECISION; \
+            *(LEFT_TYPE*)dst0 = (LEFT_TYPE)(obj->samplesAccum.ACCUM_VAR_NAME[0] / obj->samplesAccum.count); \
+            *(LEFT_TYPE*)dst1 = (LEFT_TYPE)(obj->samplesAccum.ACCUM_VAR_NAME[1] / obj->samplesAccum.count); \
+            dst0 += dstAlign0; \
+            dst1 += dstAlign1; \
+            if(obj->samplesAccum.fixed < NIX_FMT_CONVERTER_FREQ_PRECISION){ \
+                obj->samplesAccum.ACCUM_VAR_NAME[0] = obj->samplesAccum.ACCUM_VAR_NAME[1] = 0; \
+                obj->samplesAccum.count = 0; \
+            } \
+        } \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
-#define FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(LEFT_TYPE, RIGHT_TYPE, RIGHT_MATH_CAST, RIGHT_MATH_OP1, RIGHT_MATH_OP2) \
+#define FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(LEFT_TYPE, RIGHT_TYPE, RIGHT_MATH_CAST, RIGHT_MATH_OP1, RIGHT_MATH_OP2, ACCUM_VAR_NAME) \
     STNix_FmtConverterChannel* srcCh0 = &obj->src.channels[0]; \
     STNix_FmtConverterChannel* dstCh0 = &obj->dst.channels[0]; \
     STNix_FmtConverterChannel* dstCh1 = &obj->dst.channels[1]; \
     NixBYTE *src0 = (NixBYTE*)srcCh0->ptr; NixUI32 srcAlign0 = srcCh0->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
     NixBYTE *dst1 = (NixBYTE*)dstCh1->ptr; NixUI32 dstAlign1 = dstCh1->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
-        *(LEFT_TYPE*)dst0 = *(LEFT_TYPE*)dst1 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
-        obj->sampesAccum.count = (obj->sampesAccum.count + 1) % repeatSampleEach; \
-        if(obj->sampesAccum.count == 0){ \
-            *(LEFT_TYPE*)(dst0 + dstAlign0) = *(LEFT_TYPE*)(dst1 + dstAlign1) = *(LEFT_TYPE*)dst0; \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
+        obj->samplesAccum.ACCUM_VAR_NAME[0] += *(LEFT_TYPE*)dst1 = (LEFT_TYPE) (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2); \
+        src0 += srcAlign0; \
+        obj->samplesAccum.count++; \
+        obj->samplesAccum.fixed += accumPerOrgSample; \
+        while(obj->samplesAccum.fixed >= NIX_FMT_CONVERTER_FREQ_PRECISION && dst0 < dst0AfterEnd){ \
+            obj->samplesAccum.fixed -= NIX_FMT_CONVERTER_FREQ_PRECISION; \
+            *(LEFT_TYPE*)dst0 = *(LEFT_TYPE*)dst1 = (LEFT_TYPE)(obj->samplesAccum.ACCUM_VAR_NAME[0] / obj->samplesAccum.count); \
             dst0 += dstAlign0; \
             dst1 += dstAlign1; \
+            if(obj->samplesAccum.fixed < NIX_FMT_CONVERTER_FREQ_PRECISION){ \
+                obj->samplesAccum.ACCUM_VAR_NAME[0] = obj->samplesAccum.ACCUM_VAR_NAME[1] = 0; \
+                obj->samplesAccum.count = 0; \
+            } \
         } \
-        src0 += srcAlign0; \
-        dst0 += dstAlign0; \
-        dst1 += dstAlign1; \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
 
-#define FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(LEFT_TYPE, RIGHT_TYPE, RIGHT_MATH_CAST, RIGHT_MATH_OP1, RIGHT_MATH_OP2, DIV_2_WITH_SUFIX) \
+#define FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(LEFT_TYPE, RIGHT_TYPE, RIGHT_MATH_CAST, RIGHT_MATH_OP1, RIGHT_MATH_OP2, DIV_2_WITH_SUFIX, ACCUM_VAR_NAME) \
     STNix_FmtConverterChannel* srcCh0 = &obj->src.channels[0]; \
     STNix_FmtConverterChannel* srcCh1 = &obj->src.channels[1]; \
     STNix_FmtConverterChannel* dstCh0 = &obj->dst.channels[0]; \
     NixBYTE *src0 = (NixBYTE*)srcCh0->ptr; NixUI32 srcAlign0 = srcCh0->sampleAlign; \
     NixBYTE *src1 = (NixBYTE*)srcCh1->ptr; NixUI32 srcAlign1 = srcCh1->sampleAlign; \
     NixBYTE *dst0 = (NixBYTE*)dstCh0->ptr; NixUI32 dstAlign0 = dstCh0->sampleAlign; \
-    for(i = 0; i < srcBlocks; ++i){ \
-        *(LEFT_TYPE*)dst0 = (LEFT_TYPE) ((((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2) + (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src1) RIGHT_MATH_OP1) RIGHT_MATH_OP2)) / DIV_2_WITH_SUFIX; \
-        obj->sampesAccum.count = (obj->sampesAccum.count + 1) % repeatSampleEach; \
-        if(obj->sampesAccum.count == 0){ \
-            *(LEFT_TYPE*)(dst0 + dstAlign0) = *(LEFT_TYPE*)dst0; \
-            dst0 += dstAlign0; \
-        } \
+    const NixBYTE *dst0AfterEnd = dst0 + (dstAlign0 * dstBlocks); \
+    for(i = 0; i < srcBlocks && dst0 < dst0AfterEnd; ++i){ \
+        obj->samplesAccum.ACCUM_VAR_NAME[0] += (LEFT_TYPE) (((((RIGHT_MATH_CAST *(RIGHT_TYPE*)src0) RIGHT_MATH_OP1) RIGHT_MATH_OP2) + (((RIGHT_MATH_CAST *(RIGHT_TYPE*)src1) RIGHT_MATH_OP1) RIGHT_MATH_OP2)) / DIV_2_WITH_SUFIX); \
         src0 += srcAlign0; \
         src1 += srcAlign1; \
-        dst0 += dstAlign0; \
+        obj->samplesAccum.count++; \
+        obj->samplesAccum.fixed += accumPerOrgSample; \
+        while(obj->samplesAccum.fixed >= NIX_FMT_CONVERTER_FREQ_PRECISION && dst0 < dst0AfterEnd){ \
+            obj->samplesAccum.fixed -= NIX_FMT_CONVERTER_FREQ_PRECISION; \
+            *(LEFT_TYPE*)dst0 = (LEFT_TYPE)(obj->samplesAccum.ACCUM_VAR_NAME[0] / obj->samplesAccum.count); \
+            dst0 += dstAlign0; \
+        } \
+        if(obj->samplesAccum.fixed < NIX_FMT_CONVERTER_FREQ_PRECISION){ \
+            obj->samplesAccum.ACCUM_VAR_NAME[0] = obj->samplesAccum.ACCUM_VAR_NAME[1] = 0; \
+            obj->samplesAccum.count = 0; \
+        } \
     } \
+    if(dstAmmBlocksRead != NULL) *dstAmmBlocksRead = i; \
     if(dstAmmBlocksWritten != NULL) *dstAmmBlocksWritten = (NixUI32)(dst0 - (NixBYTE*)dstCh0->ptr) / dstAlign0; \
     r = NIX_TRUE;
-*/
 
-NixBOOL nixFmtConverter_convertDecFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32* dstAmmBlocksWritten){
+
+NixBOOL nixFmtConverter_convertDecFreq_(STNix_FmtConverter* obj, const NixUI32 srcBlocks, NixUI32 dstBlocks, NixUI32* dstAmmBlocksRead, NixUI32* dstAmmBlocksWritten){
     NixBOOL r = NIX_FALSE;
     //decreasing freq
-    const NixUI32 delta = (obj->src.desc.samplerate - obj->dst.desc.samplerate);
-    const NixUI32 avgSampleEach = (obj->dst.desc.samplerate + delta - 1) / delta;
-    if(avgSampleEach > 0){
-        /*NixUI32 i = 0;
+    const NixUI32 accumPerOrgSample = obj->dst.desc.samplerate * NIX_FMT_CONVERTER_FREQ_PRECISION / obj->src.desc.samplerate;
+    if(accumPerOrgSample <= 0){
+        //freq difference is below 'NIX_FMT_CONVERTER_FREQ_PRECISION', just ignore
+        r = nixFmtConverter_convertSameFreq_(obj, srcBlocks, dstBlocks, dstAmmBlocksRead, dstAmmBlocksWritten);
+    } else {
+        NixUI32 i = 0;
         if(obj->src.desc.channels == 1 && obj->dst.desc.channels == 1){
             //same 1-channel
             if(FMT_CONVERTER_IS_FLOAT32(obj->dst.desc)){            //to FLOAT32
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_CH(NixFLOAT, NixFLOAT, , ,); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixFLOAT, NixSI32, (NixDOUBLE), , / 2147483648.); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixFLOAT, NixSI16, (NixFLOAT), , / 32768.f); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_CH(NixFLOAT, NixUI8, (NixFLOAT), -128.f , / 128.f); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_CH(NixFLOAT, NixFLOAT, , , , accumFloat); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixFLOAT, NixSI32, (NixDOUBLE), , / 2147483648., accumFloat); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixFLOAT, NixSI16, (NixFLOAT), , / 32768.f, accumFloat); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_CH(NixFLOAT, NixUI8, (NixFLOAT), -128.f , / 128.f, accumFloat); }
             } else if(FMT_CONVERTER_IS_SI32(obj->dst.desc)){        //to SI32
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_CH(NixSI32, NixFLOAT, (NixDOUBLE), , * 2147483647.); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixSI32, NixSI32, , , ); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixSI32, NixSI16, (NixSI32), + 1, * (0x7FFFFFFF / 0x7FFF)); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_CH(NixSI32, NixUI8, (NixSI64), - 127, * (0x7FFFFFFF / 0x80)); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_CH(NixSI32, NixFLOAT, (NixDOUBLE), , * 2147483647., accumSI64); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixSI32, NixSI32, , , , accumSI64); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixSI32, NixSI16, (NixSI32), + 1, * (0x7FFFFFFF / 0x7FFF), accumSI64); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_CH(NixSI32, NixUI8, (NixSI64), - 127, * (0x7FFFFFFF / 0x80), accumSI64); }
             } else if(FMT_CONVERTER_IS_SI16(obj->dst.desc)){        //to SI16
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_CH(NixSI16, NixFLOAT, , , * 32767.f); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixSI16, NixSI32, , , / (0x7FFFFFFF / 0x7FFF)); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixSI16, NixSI16, , , ); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_CH(NixSI16, NixUI8, (NixSI32), - 127, * (0x7FFF / 0x80)); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_CH(NixSI16, NixFLOAT, , , * 32767.f, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixSI16, NixSI32, , , / (0x7FFFFFFF / 0x7FFF), accumSI32); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixSI16, NixSI16, , , , accumSI32); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_CH(NixSI16, NixUI8, (NixSI32), - 127, * (0x7FFF / 0x80), accumSI32); }
             } else if(FMT_CONVERTER_IS_UI8(obj->dst.desc)){         //to UI8
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_CH(NixUI8, NixFLOAT, , + 1.f, * 127.f); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixUI8, NixSI32, , / (0x7FFFFFFF / 0x7F), + 127); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixUI8, NixSI16, , / (0x7FFF / 0x7F), + 127); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_CH(NixUI8, NixUI8, , , ); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_CH(NixUI8, NixFLOAT, , + 1.f, * 127.f, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixUI8, NixSI32, , / (0x7FFFFFFF / 0x7F), + 127, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_CH(NixUI8, NixSI16, , / (0x7FFF / 0x7F), + 127, accumSI32); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_CH(NixUI8, NixUI8, , , , accumSI32); }
             }
         } else if(obj->src.desc.channels == 2 && obj->dst.desc.channels == 2){
             //same 2-channels
             if(FMT_CONVERTER_IS_FLOAT32(obj->dst.desc)){            //to FLOAT32
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_CH(NixFLOAT, NixFLOAT, , ,); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixFLOAT, NixSI32, (NixDOUBLE), , / 2147483648.); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixFLOAT, NixSI16, (NixFLOAT), , / 32768.f); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_CH(NixFLOAT, NixUI8, (NixFLOAT), -128.f , / 128.f); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_CH(NixFLOAT, NixFLOAT, , , , accumFloat); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixFLOAT, NixSI32, (NixDOUBLE), , / 2147483648., accumFloat); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixFLOAT, NixSI16, (NixFLOAT), , / 32768.f, accumFloat); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_CH(NixFLOAT, NixUI8, (NixFLOAT), -128.f , / 128.f, accumFloat); }
             } else if(FMT_CONVERTER_IS_SI32(obj->dst.desc)){        //to SI32
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_CH(NixSI32, NixFLOAT, (NixDOUBLE), , * 2147483647.); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixSI32, NixSI32, , , ); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixSI32, NixSI16, (NixSI32), + 1, * (0x7FFFFFFF / 0x7FFF)); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_CH(NixSI32, NixUI8, (NixSI64), - 127, * (0x7FFFFFFF / 0x80)); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_CH(NixSI32, NixFLOAT, (NixDOUBLE), , * 2147483647., accumSI64); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixSI32, NixSI32, , , , accumSI64); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixSI32, NixSI16, (NixSI32), + 1, * (0x7FFFFFFF / 0x7FFF), accumSI64); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_CH(NixSI32, NixUI8, (NixSI64), - 127, * (0x7FFFFFFF / 0x80), accumSI64); }
             } else if(FMT_CONVERTER_IS_SI16(obj->dst.desc)){        //to SI16
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_CH(NixSI16, NixFLOAT, , , * 32767.f); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixSI16, NixSI32, , , / (0x7FFFFFFF / 0x7FFF)); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixSI16, NixSI16, , , ); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_CH(NixSI16, NixUI8, (NixSI32), - 127, * (0x7FFF / 0x80)); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_CH(NixSI16, NixFLOAT, , , * 32767.f, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixSI16, NixSI32, , , / (0x7FFFFFFF / 0x7FFF), accumSI32); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixSI16, NixSI16, , , , accumSI32); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_CH(NixSI16, NixUI8, (NixSI32), - 127, * (0x7FFF / 0x80), accumSI32); }
             } else if(FMT_CONVERTER_IS_UI8(obj->dst.desc)){         //to UI8
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_CH(NixUI8, NixFLOAT, , + 1.f, * 127.f); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixUI8, NixSI32, , / (0x7FFFFFFF / 0x7F), + 127); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixUI8, NixSI16, , / (0x7FFF / 0x7F), + 127); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_CH(NixUI8, NixUI8, , , ); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_CH(NixUI8, NixFLOAT, , + 1.f, * 127.f, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixUI8, NixSI32, , / (0x7FFFFFFF / 0x7F), + 127, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_CH(NixUI8, NixSI16, , / (0x7FFF / 0x7F), + 127, accumSI32); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_CH(NixUI8, NixUI8, , , , accumSI32); }
             }
         } else if(obj->src.desc.channels == 1 && obj->dst.desc.channels == 2){
             //duplicate src channels
             if(FMT_CONVERTER_IS_FLOAT32(obj->dst.desc)){            //to FLOAT32
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixFLOAT, NixFLOAT, , ,); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixFLOAT, NixSI32, (NixDOUBLE), , / 2147483648.); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixFLOAT, NixSI16, (NixFLOAT), , / 32768.f); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixFLOAT, NixUI8, (NixFLOAT), -128.f , / 128.f); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixFLOAT, NixFLOAT, , , , accumFloat); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixFLOAT, NixSI32, (NixDOUBLE), , / 2147483648., accumFloat); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixFLOAT, NixSI16, (NixFLOAT), , / 32768.f, accumFloat); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixFLOAT, NixUI8, (NixFLOAT), -128.f , / 128.f, accumFloat); }
             } else if(FMT_CONVERTER_IS_SI32(obj->dst.desc)){        //to SI32
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI32, NixFLOAT, (NixDOUBLE), , * 2147483647.); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI32, NixSI32, , , ); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI32, NixSI16, (NixSI32), + 1, * (0x7FFFFFFF / 0x7FFF)); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI32, NixUI8, (NixSI64), - 127, * (0x7FFFFFFF / 0x80)); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI32, NixFLOAT, (NixDOUBLE), , * 2147483647., accumSI64); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI32, NixSI32, , , , accumSI64); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI32, NixSI16, (NixSI32), + 1, * (0x7FFFFFFF / 0x7FFF), accumSI64); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI32, NixUI8, (NixSI64), - 127, * (0x7FFFFFFF / 0x80), accumSI64); }
             } else if(FMT_CONVERTER_IS_SI16(obj->dst.desc)){        //to SI16
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI16, NixFLOAT, , , * 32767.f); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI16, NixSI32, , , / (0x7FFFFFFF / 0x7FFF)); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI16, NixSI16, , , ); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI16, NixUI8, (NixSI32), - 127, * (0x7FFF / 0x80)); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI16, NixFLOAT, , , * 32767.f, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI16, NixSI32, , , / (0x7FFFFFFF / 0x7FFF), accumSI32); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI16, NixSI16, , , , accumSI32); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixSI16, NixUI8, (NixSI32), - 127, * (0x7FFF / 0x80), accumSI32); }
             } else if(FMT_CONVERTER_IS_UI8(obj->dst.desc)){         //to UI8
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixUI8, NixFLOAT, , + 1.f, * 127.f); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixUI8, NixSI32, , / (0x7FFFFFFF / 0x7F), + 127); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixUI8, NixSI16, , / (0x7FFF / 0x7F), + 127); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixUI8, NixUI8, , , ); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixUI8, NixFLOAT, , + 1.f, * 127.f, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixUI8, NixSI32, , / (0x7FFFFFFF / 0x7F), + 127, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixUI8, NixSI16, , / (0x7FFF / 0x7F), + 127, accumSI32); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_1_TO_2_CH(NixUI8, NixUI8, , , , accumSI32); }
             }
         } else if(obj->src.desc.channels == 2 && obj->dst.desc.channels == 1){
             //merge src channels
             if(FMT_CONVERTER_IS_FLOAT32(obj->dst.desc)){            //to FLOAT32
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixFLOAT, NixFLOAT, , , , 2.f); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixFLOAT, NixSI32, (NixDOUBLE), , / 2147483648., 2); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixFLOAT, NixSI16, (NixFLOAT), , / 32768.f, 2); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixFLOAT, NixUI8, (NixFLOAT), -128.f , / 128.f, 2); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixFLOAT, NixFLOAT, , , , 2.f, accumFloat); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixFLOAT, NixSI32, (NixDOUBLE), , / 2147483648., 2, accumFloat); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixFLOAT, NixSI16, (NixFLOAT), , / 32768.f, 2, accumFloat); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixFLOAT, NixUI8, (NixFLOAT), -128.f , / 128.f, 2, accumFloat); }
             } else if(FMT_CONVERTER_IS_SI32(obj->dst.desc)){        //to SI32
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI32, NixFLOAT, (NixDOUBLE), , * 2147483647., 2.); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI32, NixSI32, , , , 2); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI32, NixSI16, (NixSI32), + 1, * (0x7FFFFFFF / 0x7FFF), 2); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI32, NixUI8, (NixSI64), - 127, * (0x7FFFFFFF / 0x80), 2); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI32, NixFLOAT, (NixDOUBLE), , * 2147483647., 2., accumSI64); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI32, NixSI32, , , , 2, accumSI64); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI32, NixSI16, (NixSI32), + 1, * (0x7FFFFFFF / 0x7FFF), 2, accumSI64); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI32, NixUI8, (NixSI64), - 127, * (0x7FFFFFFF / 0x80), 2, accumSI64); }
             } else if(FMT_CONVERTER_IS_SI16(obj->dst.desc)){        //to SI16
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI16, NixFLOAT, , , * 32767.f, 2.f); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI16, NixSI32, , , / (0x7FFFFFFF / 0x7FFF), 2); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI16, NixSI16, , , , 2); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI16, NixUI8, (NixSI32), - 127, * (0x7FFF / 0x80), 2); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI16, NixFLOAT, , , * 32767.f, 2.f, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI16, NixSI32, , , / (0x7FFFFFFF / 0x7FFF), 2, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI16, NixSI16, , , , 2, accumSI32); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixSI16, NixUI8, (NixSI32), - 127, * (0x7FFF / 0x80), 2, accumSI32); }
             } else if(FMT_CONVERTER_IS_UI8(obj->dst.desc)){         //to UI8
-                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixUI8, NixFLOAT, , + 1.f, * 127.f, 2.f); }
-                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixUI8, NixSI32, , / (0x7FFFFFFF / 0x7F), + 127, 2); }
-                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixUI8, NixSI16, , / (0x7FFF / 0x7F), + 127, 2); }
-                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixUI8, NixUI8, , , , 2); }
+                if(FMT_CONVERTER_IS_FLOAT32(obj->src.desc)){        FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixUI8, NixFLOAT, , + 1.f, * 127.f, 2.f, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI32(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixUI8, NixSI32, , / (0x7FFFFFFF / 0x7F), + 127, 2, accumSI32); }
+                else if(FMT_CONVERTER_IS_SI16(obj->src.desc)){      FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixUI8, NixSI16, , / (0x7FFF / 0x7F), + 127, 2, accumSI32); }
+                else if(FMT_CONVERTER_IS_UI8(obj->src.desc)){       FMT_CONVERTER_DEC_FREQ_2_TO_1_CH(NixUI8, NixUI8, , , , 2, accumSI32); }
             }
-        }*/
+        }
     }
     return r;
 }
@@ -3345,7 +3482,7 @@ NixBOOL nixFmtConverter_convertDecFreq_(STNix_FmtConverter* obj, const NixUI32 s
 //
 
 NixUI32 nixFmtConverter_maxChannels(void){
-    return NIX_FMT_CONVERTER_MAX_CHANNELS;
+    return NIX_FMT_CONVERTER_CHANNELS_MAX;
 }
 
 NixUI32 nixFmtConverter_samplesForNewFrequency(const NixUI32 freqOrg, const NixUI32 freqNew, const NixUI32 ammSampesOrg){   //ammount of output samples from one frequeny to another, +1 for safety
@@ -3353,16 +3490,15 @@ NixUI32 nixFmtConverter_samplesForNewFrequency(const NixUI32 freqOrg, const NixU
     if(freqOrg < freqNew){
         //increasing freq
         const NixUI32 delta = (freqNew - freqOrg);
-        const NixUI32 repeatSampleEach = (freqOrg + delta - 1) / delta;
-        if(repeatSampleEach > 0){
-            r = ammSampesOrg + ((ammSampesOrg + repeatSampleEach - 1) / repeatSampleEach) + 1;
-        }
+        const NixUI32 repeatPerOrgSample = delta * NIX_FMT_CONVERTER_FREQ_PRECISION / freqOrg;
+        r = ammSampesOrg + ( ammSampesOrg * repeatPerOrgSample / NIX_FMT_CONVERTER_FREQ_PRECISION ) + 1;
     } else if(freqOrg > freqNew){
         //decreasing freq
-        const NixUI32 delta = (freqOrg - freqNew);
-        const NixUI32 avgSampleEach = (freqNew + delta - 1) / delta;
-        if(avgSampleEach > 0){
-            r = ammSampesOrg - (ammSampesOrg / avgSampleEach) + 1;
+        const NixUI32 accumPerOrgSample = freqNew * NIX_FMT_CONVERTER_FREQ_PRECISION / freqOrg;
+        if(accumPerOrgSample > 0){
+            r = ( ammSampesOrg * accumPerOrgSample / NIX_FMT_CONVERTER_FREQ_PRECISION) + 1;
+        } else {
+            r = ammSampesOrg + 1;
         }
     }
     return r;

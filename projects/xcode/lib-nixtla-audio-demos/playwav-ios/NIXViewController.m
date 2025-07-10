@@ -7,7 +7,7 @@
 //
 
 #import "NIXViewController.h"
-#include "utilLoadWav.c"
+#include "../utils/utilLoadWav.c"
 
 typedef struct STFileStatus_ {
 	const char* fileName;
@@ -104,7 +104,7 @@ STFileStatus files[] = {
 		NSMutableString* strTmp = [[NSMutableString alloc] init];
 		[strTmp appendFormat:@"%d sources (%d assigned)\n", nixStatusDesc.countSources, nixStatusDesc.countSourcesAssigned];
 		[strTmp appendFormat:@"%d play buffers", nixStatusDesc.countPlayBuffers];
-		if(nixStatusDesc.sizePlayBuffers!=0){
+		if(nixStatusDesc.sizePlayBuffers != 0){
 			[strTmp appendFormat:@" (%d KB", (nixStatusDesc.sizePlayBuffers / 1024)];
 			if(nixStatusDesc.sizePlayBuffersAtSW == 0){
 				[strTmp appendFormat:@" at HW)\n"];
@@ -115,7 +115,7 @@ STFileStatus files[] = {
 				[strTmp appendFormat:@"   (%d KBs SW, %d KBs HW)\n", (nixStatusDesc.sizePlayBuffersAtSW / 1024),  ((nixStatusDesc.sizePlayBuffers - nixStatusDesc.sizePlayBuffersAtSW) / 1024)];
 			}
 		}
-		if(nixStatusDesc.countRecBuffers!=0){
+		if(nixStatusDesc.countRecBuffers != 0){
 			[strTmp appendFormat:@"%d rec buffers (%d KB", nixStatusDesc.countRecBuffers, (nixStatusDesc.sizeRecBuffers / 1024)];
 			if(nixStatusDesc.sizeRecBuffersAtSW == 0){
 				[strTmp appendFormat:@" all HW)\n"];
@@ -191,14 +191,15 @@ STFileStatus files[] = {
 		printf("ERROR, nix is not inited.\n");
 	} else {
 		STNix_audioDesc audioDesc;
-		NixUI8* audioData = NULL; NixUI32 audioDataBytes;
+		NixUI8* audioData = NULL;
+        NixUI32 audioDataBytes = 0;
 		//Look for STFileStatus index
 		NixSI32 i, indexFound = -1; const NixSI32 size = (sizeof(files) / sizeof(STFileStatus));
 		for(i=0; i<size; i++){
 			//Compare wavfiles names
 			const char* str = files[i].fileName;
 			const char* str2 = [wavFile UTF8String];
-			while((*str)!=0 && (*str2)!=0){
+			while((*str) != 0 && (*str2) != 0){
 				if((*str)!=(*str2)) break;
 				str++; str2++;
 			}
@@ -214,27 +215,27 @@ STFileStatus files[] = {
 			NixUI16 iSourceWav, iBuffer;
 			STFileStatus* status = &files[indexFound];
 			//Stop previous source
-			if(status->source!=0){
+			if(status->source != 0){
 				nixSourceStop(&_nix, status->source);
 				nixSourceRelease(&_nix, status->source);
 				status->source = 0;
 			}
 			//Load and play wav
-			if(loadDataFromWavFile([[NSString stringWithFormat:@"%@/%@", [[NSBundle mainBundle] bundlePath], wavFile] UTF8String], &audioDesc, &audioData, &audioDataBytes)==0){
+			if(!loadDataFromWavFile([[NSString stringWithFormat:@"%@/%@", [[NSBundle mainBundle] bundlePath], wavFile] UTF8String], &audioDesc, &audioData, &audioDataBytes)){
 				printf("ERROR, WAV file load failed.\n");
 			} else {
 				//printf("WAV file loaded.\n");
 				iSourceWav = nixSourceAssignStatic(&_nix, 1, 0, NULL, NULL);
-				if(iSourceWav==0){
+				if(iSourceWav == 0){
 					printf("ERROR, Source assign failed.\n");
 				} else {
 					//printf("Source(%d) assigned and retained.\n", iSourceWav);
 					iBuffer = nixBufferWithData(&_nix, &audioDesc, audioData, audioDataBytes);
-					if(iBuffer==0){
+					if(iBuffer == 0){
 						printf("ERROR, Buffer assign failed.\n");
 					} else {
 						//printf("Buffer(%d) loaded with data and retained.\n", iBuffer);
-						if(nixSourceSetBuffer(&_nix, iSourceWav, iBuffer)==0){
+						if(!nixSourceSetBuffer(&_nix, iSourceWav, iBuffer)){
 							printf("ERROR, Buffer-to-source linking failed.\n");
 						} else {
 							//printf("Buffer(%d) linked with source(%d).\n", iBuffer, iSourceWav);

@@ -36,7 +36,7 @@ NixUI8 loadDataFromWavFile(JNIEnv *env, jobject assetManager, const char* pathTo
 					if(bytesReadedID==4){
 						NixUI32 subchunckBytesReaded = 0;
 						NixUI32 subchunckSize; AAsset_read(wavFile, &subchunckSize, sizeof(subchunckSize) * 1);  //subchunckBytesReaded += sizeof(subchunckSize);
-						NixUI8 tamanoChunckEsImpar = ((subchunckSize % 2)!=0);
+						NixUI8 tamanoChunckEsImpar = ((subchunckSize % 2) != 0);
 						if(subchunckID[0]=='f' && subchunckID[1]=='m' && subchunckID[2]=='t' && subchunckID[3]==' '){
 							if(!formatChunckPresent){
 								//

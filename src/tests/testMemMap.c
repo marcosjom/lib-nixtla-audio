@@ -67,7 +67,7 @@ void nbMemmapRegister(STNB_MemMap* map, void* pointer, unsigned long bytes, cons
 				cadena2		= &map->strArr[map->strIndexsArr[i]];
 				strEquals	= 1;
 				//comparas caracteres
-				while((*cadena1)!=0 && (*cadena2)!=0){
+				while((*cadena1) != 0 && (*cadena2) != 0){
 					assert(cadena2 < &map->strArr[map->strArrUse]);
 					if((*cadena1)!=(*cadena2)){
 						strEquals = 0;
@@ -79,16 +79,16 @@ void nbMemmapRegister(STNB_MemMap* map, void* pointer, unsigned long bytes, cons
 				//validar si no se realizo la compracion de todos los caracteres (una cadena es mas corta que la otra)
 				if(strEquals){
 					if((*cadena1)==(*cadena2)){ //la condicional es falso si uno es '\0' y el otro es diferente
-						iStrHint = map->strIndexsArr[i]; assert(iStrHint!=0);
+						iStrHint = map->strIndexsArr[i]; assert(iStrHint != 0);
 						break;
 					}
 				}
 			}
 			//Register new string
-			if(iStrHint==0){
+			if(iStrHint == 0){
 				unsigned long strHintLen = 0;
 				cadena1		= strHint;
-				while((*cadena1)!=0) cadena1++;
+				while((*cadena1) != 0) cadena1++;
 				strHintLen	= (cadena1 - strHint);
 				//
 				if((map->strArrUse + strHintLen) >= map->strArrSize){
@@ -96,7 +96,7 @@ void nbMemmapRegister(STNB_MemMap* map, void* pointer, unsigned long bytes, cons
 					map->strArrSize += 2048 + ((map->strArrUse + strHintLen) - map->strArrSize);
 					newArr			= (char*)malloc(sizeof(char) * map->strArrSize);
 					if(map->strArr!=NULL){
-						if(map->strArrUse!=0) memcpy(newArr, map->strArr, sizeof(char) * map->strArrUse);
+						if(map->strArrUse != 0) memcpy(newArr, map->strArr, sizeof(char) * map->strArrUse);
 						free(map->strArr);
 					}
 					map->strArr = newArr;
@@ -107,7 +107,7 @@ void nbMemmapRegister(STNB_MemMap* map, void* pointer, unsigned long bytes, cons
 					map->strIndexsArrSize	+= 128;
 					newArr					= (unsigned long*)malloc(sizeof(unsigned long) * map->strIndexsArrSize);
 					if(map->strIndexsArr!=NULL){
-						if(map->strIndexsArrUse!=0) memcpy(newArr, map->strIndexsArr, sizeof(unsigned long) * map->strIndexsArrUse);
+						if(map->strIndexsArrUse != 0) memcpy(newArr, map->strIndexsArr, sizeof(unsigned long) * map->strIndexsArrUse);
 						free(map->strIndexsArr);
 					}
 					map->strIndexsArr = newArr;
@@ -120,7 +120,7 @@ void nbMemmapRegister(STNB_MemMap* map, void* pointer, unsigned long bytes, cons
 			}
 		}
 	}
-	//assert(iStrHint!=0); //Temporal
+	//assert(iStrHint != 0); //Temporal
 	//Register pointer
 	{
 		STNB_MemBlock newBlock;
@@ -148,7 +148,7 @@ void nbMemmapRegister(STNB_MemMap* map, void* pointer, unsigned long bytes, cons
 			map->blocksArrSize	+= 1024;
 			newArr				= (STNB_MemBlock*)malloc(sizeof(STNB_MemBlock) * map->blocksArrSize);
 			if(map->blocksArr!=NULL){
-				if(map->blocksArrUse!=0) memcpy(newArr, map->blocksArr, sizeof(STNB_MemBlock) * map->blocksArrUse);
+				if(map->blocksArrUse != 0) memcpy(newArr, map->blocksArr, sizeof(STNB_MemBlock) * map->blocksArrUse);
 				free(map->blocksArr);
 			}
 			map->blocksArr = newArr;

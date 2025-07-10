@@ -20,6 +20,9 @@
 #define NIX_ASSERTS_ACTIVATED
 //#define NIX_SILENT_MODE
 //#define NIX_VERBOSE_MODE
+//
+//#define NIX_FORCE_OPENAL   //if defined, forces OpenAL in Windows (instead of DirectX), Mac and iOS (instead of AVFAudio)
+
 
 //++++++++++++++++++++
 //++++++++++++++++++++
@@ -131,6 +134,13 @@ extern "C" {
 void*       nixAVAudioEngine_create(void);
 void        nixAVAudioEngine_destroy(void* obj);
 //
+void*       nixAVAudioRecorder_create(void* eng, const STNix_audioDesc* audioDesc, const NixUI16 buffersCount, const NixUI16 samplesPerBuffer);
+void        nixAVAudioRecorder_destroy(void* obj);
+NixBOOL     nixAVAudioRecorder_start(void* obj);
+NixBOOL     nixAVAudioRecorder_stop(void* obj);
+void        nixAVAudioRecorder_notifyBuffers(void* obj, STNix_Engine* engAbs, PTRNIX_CaptureBufferFilledCallback bufferCaptureCallback, void* bufferCaptureCallbackUserData);
+
+//
 void*       nixAVAudioSource_create(void* eng);
 void        nixAVAudioSource_destroy(void* obj);
 NixBOOL     nixAVAudioSource_setVolume(void* obj, const float vol);
@@ -146,6 +156,7 @@ NixBOOL     nixAVAudioSource_queueBuffer(void* obj, void* buff, void (*callback)
 void*       nixAVAudioPCMBuffer_create(const STNix_audioDesc* audioDesc, const NixUI8* audioDataPCM, const NixUI32 audioDataPCMBytes);
 void        nixAVAudioPCMBuffer_destroy(void* obj);
 NixBOOL     nixAVAudioPCMBuffer_setData(void* obj, const STNix_audioDesc* audioDesc, const NixUI8* audioDataPCM, const NixUI32 audioDataPCMBytes);
+
 
 #ifdef __cplusplus
 }

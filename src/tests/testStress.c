@@ -59,7 +59,7 @@ int main(int argc, const char * argv[]) {
 		loadAndPlayWav(&nix, "./res/audioTest.wav", &iSourceWav, &iBufferWav);
 		//Source for stream eco (play the captured audio)
 		iSourceStrm = nixSourceAssignStream(&nix, 1, 0, NULL, NULL, 4, NULL, NULL);
-		if(iSourceStrm!=0){
+		if(iSourceStrm != 0){
 			nixSourcePlay(&nix, iSourceStrm);
 			//Init the capture
 			audioDesc._canales			= 1;
@@ -99,7 +99,7 @@ int main(int argc, const char * argv[]) {
 
 void printMemReport(){
 	printf("-------------- MEM REPORT -----------\n");
-	if(memmap.currCountAllocationsActive==0){
+	if(memmap.currCountAllocationsActive == 0){
 		printf("Nixtla: no memory leaking detected :)\n");
 	} else {
 		printf("WARNING, NIXTLA MEMORY-LEAK DETECTED! :(\n");
@@ -111,7 +111,7 @@ void printMemReport(){
 void bufferCapturedCallback(STNix_Engine* nix, void* userdata, const STNix_audioDesc audioDesc, const NixUI8* audioData, const NixUI32 audioDataBytes, const NixUI32 audioDataSamples){
 	const NixUI16 iSource = *((NixUI16*)userdata);
 	const NixUI16 iBuffer = nixBufferWithData(nix, &audioDesc, audioData, audioDataBytes);
-	if(iBuffer==0){
+	if(iBuffer == 0){
 		printf("bufferCapturedCallback, nixBufferWithData failed for iSource(%d)\n", iSource);
 	} else {
 		if(nixSourceStreamAppendBuffer(nix, iSource, iBuffer)){

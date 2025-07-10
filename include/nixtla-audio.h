@@ -170,14 +170,23 @@ void		nixCaptureFilledBuffersRelease(STNix_Engine* engAbs, NixUI32 quantBuffersT
 void		nixDbgPrintSourcesStatus(STNix_Engine* engAbs);
 
 //PCMFormat converter
+//
+//AVFAudio (Apple's API for Mac and iOS) does not supports "complex transformations", mostly change of frequencies.
+//Had to code this converter to support AVFAudio with some limitations:
+// * 1 or 2 channels only
+// * float32, int32, int16 or uint8 sample-types only
+// * from-to any frequency
+//
 void*       nixFmtConverter_create(void);
 void        nixFmtConverter_destroy(void* obj);
 NixBOOL     nixFmtConverter_prepare(void* obj, const STNix_audioDesc* srcDesc, const STNix_audioDesc* dstDesc);
 NixBOOL     nixFmtConverter_setPtrAtSrcChannel(void* obj, const NixUI32 iChannel, void* ptr, const NixUI32 sampleAlign);
 NixBOOL     nixFmtConverter_setPtrAtDstChannel(void* obj, const NixUI32 iChannel, void* ptr, const NixUI32 sampleAlign);
-NixBOOL     nixFmtConverter_convert(void* obj, const NixUI32 srcBlocks, NixUI32* dstAmmBlocksWritten);
+NixBOOL     nixFmtConverter_setPtrAtSrcInterlaced(void* obj, const STNix_audioDesc* desc, void* ptr, const NixUI32 iFirstSample);
+NixBOOL     nixFmtConverter_setPtrAtDstInterlaced(void* obj, const STNix_audioDesc* desc, void* ptr, const NixUI32 iFirstSample);
+NixBOOL     nixFmtConverter_convert(void* obj, const NixUI32 srcBlocks, NixUI32 dstBlocks, NixUI32* dstAmmBlocksRead, NixUI32* dstAmmBlocksWritten);
 //
-NixUI32     nixFmtConverter_maxChannels(void); //defined at compile-time
+NixUI32     nixFmtConverter_maxChannels(void); //= 2, defined at compile-time
 NixUI32     nixFmtConverter_samplesForNewFrequency(const NixUI32 freqOrg, const NixUI32 freqNew, const NixUI32 ammSampesOrg);   //ammount of output samples from one frequeny to another, +1 for safety
 
 #ifdef __cplusplus

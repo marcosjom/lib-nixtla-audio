@@ -15,7 +15,7 @@ NixUI16 sourceStream = 0;
 void bufferCapturedCallback(STNix_Engine* eng, void* userdata, const STNix_audioDesc audioDesc, const NixUI8* audioData, const NixUI32 audioDataBytes, const NixUI32 audioDataSamples){
 	const NixUI16 iSource = *((NixUI16*)userdata);
 	const NixUI16 iBuffer = nixBufferWithData(eng, &audioDesc, audioData, audioDataBytes);
-	if(iBuffer==0){
+	if(iBuffer == 0){
 		printf("bufferCapturedCallback, nixBufferWithData failed for iSource(%d)\n", iSource);
 	} else {
 		if(nixSourceStreamAppendBuffer(eng, iSource, iBuffer)){
@@ -43,11 +43,11 @@ void bufferCapturedCallback(STNix_Engine* eng, void* userdata, const STNix_audio
 	[[self btnAction] addTarget:self action:@selector(touchUpInside:) forControlEvents: UIControlEventTouchUpInside];
 	_nixInited	= NO;
 	//
-	if(AudioSessionInitialize(NULL, NULL, NULL/*sessionCallback*/, NULL)!=0){ //run loop, run loop mode, metodo escuchador de interrupciones, datos que son pasados al metodo escuchador
+	if(AudioSessionInitialize(NULL, NULL, NULL/*sessionCallback*/, NULL) != 0){ //run loop, run loop mode, metodo escuchador de interrupciones, datos que son pasados al metodo escuchador
 		printf("ERROR: AudioSessionInitialize failed.\n");
 	} else {
 		UInt32 audioCat = kAudioSessionCategory_PlayAndRecord;
-		if(AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(audioCat), &audioCat)!=0){
+		if(AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(audioCat), &audioCat) != 0){
 			printf("ERROR, AudioSessionSetProperty(kAudioSessionCategory_PlayAndRecord) failed\n");
 		} else {
 			printf("iOS audion session inited,\n");
@@ -67,7 +67,7 @@ void bufferCapturedCallback(STNix_Engine* eng, void* userdata, const STNix_audio
 		} else {
 			printf("nixInit success.\n");
 			_nixInited = YES;
-			if(AudioSessionSetActive(true)!=0){
+			if(AudioSessionSetActive(true) != 0){
 				printf("ERROR, AudioSessionSetActive(true) failed\n");
 			}
 		}
@@ -86,7 +86,7 @@ void bufferCapturedCallback(STNix_Engine* eng, void* userdata, const STNix_audio
 	if(_nixInited){
 		nixFinalize(&_nix);
 		_nixInited = NIX_FALSE;
-		if(AudioSessionSetActive(false)!=0){
+		if(AudioSessionSetActive(false) != 0){
 			printf("ERROR, AudioSessionSetActive(false) failed\n");
 		}
 	}
@@ -105,7 +105,7 @@ void bufferCapturedCallback(STNix_Engine* eng, void* userdata, const STNix_audio
 		NSMutableString* strTmp = [[NSMutableString alloc] init];
 		[strTmp appendFormat:@"%d sources (%d assigned)\n", nixStatusDesc.countSources, nixStatusDesc.countSourcesAssigned];
 		[strTmp appendFormat:@"%d play buffers", nixStatusDesc.countPlayBuffers];
-		if(nixStatusDesc.sizePlayBuffers!=0){
+		if(nixStatusDesc.sizePlayBuffers != 0){
 			[strTmp appendFormat:@" (%d KB", (nixStatusDesc.sizePlayBuffers / 1024)];
 			if(nixStatusDesc.sizePlayBuffersAtSW == 0){
 				[strTmp appendFormat:@" at HW)\n"];
@@ -118,7 +118,7 @@ void bufferCapturedCallback(STNix_Engine* eng, void* userdata, const STNix_audio
 		} else {
 			[strTmp appendFormat:@"\n"];
 		}
-		if(nixStatusDesc.countRecBuffers!=0){
+		if(nixStatusDesc.countRecBuffers != 0){
 			[strTmp appendFormat:@"%d rec buffers (%d KB", nixStatusDesc.countRecBuffers, (nixStatusDesc.sizeRecBuffers / 1024)];
 			if(nixStatusDesc.sizeRecBuffersAtSW == 0){
 				[strTmp appendFormat:@" all HW)\n"];
@@ -175,7 +175,7 @@ void bufferCapturedCallback(STNix_Engine* eng, void* userdata, const STNix_audio
 		printf("Capture stopping\n");
 		nixCaptureStop(&_nix);
 		nixCaptureFinalize(&_nix);
-		if(sourceStream!=0){
+		if(sourceStream != 0){
 			nixSourceStop(&_nix, sourceStream);
 			nixSourceRelease(&_nix, sourceStream);
 			sourceStream = 0;
@@ -183,7 +183,7 @@ void bufferCapturedCallback(STNix_Engine* eng, void* userdata, const STNix_audio
 		printf("Capture stopped\n");
 	} else {
 		sourceStream = nixSourceAssignStream(&_nix, NIX_TRUE, 0, NULL, NULL, NIX_DEMO_BUFFERS_PER_SECOND, NULL, NULL);
-		if(sourceStream==0){
+		if(sourceStream == 0){
 			printf("ERROR, nixSourceAssignStream failed\n");
 		} else {
 			STNix_audioDesc audDesc;

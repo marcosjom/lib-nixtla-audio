@@ -37,7 +37,7 @@ STNB_MemMap memmap;
 //In this demo, we include the "source" file to implement customized memory allocation.
 //The "nixtla-audio.c" file is not part of the project tree.
 
-#include "../demos/utilLoadWav.c"
+#include "../utils/utilLoadWav.c"
 
 void printMemReport();
 void loadAndPlayWav(STNix_Engine* nix, const char* strWavPath, NixUI16* iSourceWav, NixUI16* iBufferWav);
@@ -55,7 +55,7 @@ int main(int argc, const char * argv[]) {
 		loadAndPlayWav(&nix, "./res/audioTest.wav", &iSourceWav, &iBufferWav);
 		//Source for stream eco (play the captured audio)
 		iSourceStrm = nixSourceAssignStream(&nix, 1, 0, NULL, NULL, 4, NULL, NULL);
-		if(iSourceStrm!=0){
+		if(iSourceStrm != 0){
 			nixSourcePlay(&nix, iSourceStrm);
 			//Init the capture
 			audioDesc.samplesFormat		= ENNix_sampleFormat_int;
@@ -96,7 +96,7 @@ int main(int argc, const char * argv[]) {
 
 void printMemReport(){
 	printf("-------------- MEM REPORT -----------\n");
-	if(memmap.currCountAllocationsActive==0){
+	if(memmap.currCountAllocationsActive == 0){
 		printf("Nixtla: no memory leaking detected :)\n");
 	} else {
 		printf("WARNING, NIXTLA MEMORY-LEAK DETECTED! :(\n");
@@ -108,26 +108,27 @@ void printMemReport(){
 void loadAndPlayWav(STNix_Engine* nix, const char* strWavPath, NixUI16* p_iSourceWav, NixUI16* p_iBufferWav){
 	STNix_audioDesc audioDesc;
 	NixUI16 iSourceWav = 0, iBufferWav = 0;
-	NixUI8* audioData = NULL; NixUI32 audioDataBytes;
+	NixUI8* audioData = NULL;
+    NixUI32 audioDataBytes = 0;
 	if(!loadDataFromWavFile(strWavPath, &audioDesc, &audioData, &audioDataBytes)){
 		printf("ERROR, loading WAV file.\n");
 	} else {
 		printf("WAV file loaded.\n");
 		iSourceWav = nixSourceAssignStatic(nix, 1, 0, NULL, NULL);
-		if(iSourceWav==0){
+		if(iSourceWav == 0){
 			printf("Source assign failed.\n");
 		} else {
 			printf("Source(%d) assigned and retained.\n", iSourceWav);
 			iBufferWav = nixBufferWithData(nix, &audioDesc, audioData, audioDataBytes);
-			if(iBufferWav==0){
+			if(iBufferWav == 0){
 				printf("Buffer assign failed.\n");
 			} else {
 				printf("Buffer(%d) loaded with data and retained.\n", iBufferWav);
-				if(nixSourceSetBuffer(nix, iSourceWav, iBufferWav)==0){
+				if(!nixSourceSetBuffer(nix, iSourceWav, iBufferWav)){
 					printf("Buffer-to-source linking failed.\n");
 				} else {
 					printf("Buffer(%d) linked with source(%d).\n", iBufferWav, iSourceWav);
-					nixSourceSetRepeat(nix, iSourceWav, 1);
+					nixSourceSetRepeat(nix, iSourceWav, NIX_TRUE);
 					nixSourceSetVolume(nix, iSourceWav, 1.0f);
 					nixSourcePlay(nix, iSourceWav);
 				}
@@ -142,7 +143,7 @@ void loadAndPlayWav(STNix_Engine* nix, const char* strWavPath, NixUI16* p_iSourc
 void bufferCapturedCallback(STNix_Engine* nix, void* userdata, const STNix_audioDesc audioDesc, const NixUI8* audioData, const NixUI32 audioDataBytes, const NixUI32 audioDataSamples){
 	const NixUI16 iSource = *((NixUI16*)userdata);
 	const NixUI16 iBuffer = nixBufferWithData(nix, &audioDesc, audioData, audioDataBytes);
-	if(iBuffer==0){
+	if(iBuffer == 0){
 		printf("bufferCapturedCallback, nixBufferWithData failed for iSource(%d)\n", iSource);
 	} else {
 		if(nixSourceStreamAppendBuffer(nix, iSource, iBuffer)){

@@ -36,7 +36,7 @@ int loadDataFromWavFile(const char* pathToWav, STNix_audioDesc* audioDesc, NixUI
 						NixUI32 subchunckSize;
 						NixUI8 tamanoChunckEsImpar;
 						fread(&subchunckSize, sizeof(subchunckSize), 1, wavFile);  //subchunckBytesReaded += sizeof(subchunckSize);
-						tamanoChunckEsImpar = ((subchunckSize % 2)!=0);
+						tamanoChunckEsImpar = ((subchunckSize % 2) != 0);
 						if(subchunckID[0]=='f' && subchunckID[1]=='m' && subchunckID[2]=='t' && subchunckID[3]==' '){
 							//printf("WAV: Procesando subchunck: '%c%c%c%c' (%u bytes)\n", subchunckID[0], subchunckID[1], subchunckID[2], subchunckID[3], subchunckSize);
 							if(!formatChunckPresent){
