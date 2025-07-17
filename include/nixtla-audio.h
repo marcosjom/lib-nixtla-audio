@@ -41,32 +41,115 @@ typedef	unsigned short int 	NixUI16;	//NixUI16, Unsigned 16-bit integer value
 typedef	unsigned int 		NixUI32;	//NixUI32, Unsigned 32-bit integer value
 typedef	unsigned long long	NixUI64;	//NixUI64[n], Unsigned 64-bit array—n is the number of array elements
 typedef float				NixFLOAT;	//float
-typedef double              NixDOUBLE;    //double
+typedef double              NixDOUBLE;  //double
 
 #define NIX_FALSE			0
 #define NIX_TRUE			1
-	
+
 //Capabilities mask
-#define NIX_CAP_AUDIO_CAPTURE			1
-#define NIX_CAP_AUDIO_STATIC_BUFFERS	2
-#define NIX_CAP_AUDIO_SOURCE_OFFSETS	4
+#define NIX_CAP_AUDIO_CAPTURE           1
+#define NIX_CAP_AUDIO_STATIC_BUFFERS    2
+#define NIX_CAP_AUDIO_SOURCE_OFFSETS    4
 
 //Audio description
 typedef enum ENNix_sampleFormat_ {
-	ENNix_sampleFormat_none = 0,
-	ENNix_sampleFormat_int,			//unsigned byte for 8-bits, signed short/int/long for 16/24/32/64 bits
-	ENNix_sampleFormat_float
+    ENNix_sampleFormat_none = 0,
+    ENNix_sampleFormat_int,         //unsigned byte for 8-bits, signed short/int/long for 16/24/32/64 bits
+    ENNix_sampleFormat_float,        //float 32 bits
+    //
+    ENNix_sampleFormat_count        //float 32 bits
 } ENNix_sampleFormat;
-	
+    
+#define STNix_audioDesc_Zero    { 0, 0, 0, 0, 0 }
+
 typedef struct STNix_audioDesc_ {
-	NixUI8	samplesFormat;	//ENNix_sampleFormat
-	NixUI8	channels;
-	NixUI8	bitsPerSample;
-	NixUI16	samplerate;
-	NixUI16	blockAlign;
+    NixUI8  samplesFormat;  //ENNix_sampleFormat
+    NixUI8  channels;
+    NixUI8  bitsPerSample;
+    NixUI16 samplerate;
+    NixUI16 blockAlign;     //bytes per sample-block: (bitsPerSample / 8) * channels <= for interlaced byte-aligned sizes usually
 } STNix_audioDesc;
 
 NixBOOL STNix_audioDesc_IsEqual(const STNix_audioDesc* obj, const STNix_audioDesc* other);
+
+//API
+
+#define STNixApiEngine_Zero     { NULL }
+
+typedef struct STNixApiEngine_ {
+    void* opq; //opaque object
+} STNixApiEngine;
+
+#define STNixApiBuffer_Zero     { NULL }
+
+typedef struct STNixApiBuffer_ {
+    void* opq; //opaque object
+} STNixApiBuffer;
+
+#define STNixApiSource_Zero     { NULL }
+
+typedef struct STNixApiSource_ {
+    void* opq;  //opaque object
+} STNixApiSource;
+
+#define STNixApiRecorder_Zero     { NULL }
+
+typedef struct STNixApiRecorder_ {
+    void* opq;  //opaque object
+} STNixApiRecorder;
+
+//Callbacks (internals)
+
+typedef void (*NixApiCaptureBufferFilledCallback)(STNixApiEngine eng, STNixApiRecorder rec, const STNix_audioDesc audioDesc, const NixUI8* audioData, const NixUI32 audioDataBytes, const NixUI32 audioDataSamples, void* userdata);
+
+//ApiItf
+
+typedef struct STNixApiEngineItf_ {
+    STNixApiEngine  (*create)(void);
+    void            (*destroy)(STNixApiEngine obj);
+    void            (*printCaps)(STNixApiEngine obj);
+    NixBOOL         (*ctxIsActive)(STNixApiEngine obj);
+    NixBOOL         (*ctxActivate)(STNixApiEngine obj);
+    NixBOOL         (*ctxDeactivate)(STNixApiEngine obj);
+    void            (*tick)(STNixApiEngine obj);
+} STNixApiEngineItf;
+                          
+typedef struct STNixApiBufferItf_ {
+    STNixApiBuffer  (*create)(const STNix_audioDesc* audioDesc, const NixUI8* audioDataPCM, const NixUI32 audioDataPCMBytes);
+    void            (*destroy)(STNixApiBuffer obj);
+    NixBOOL         (*setData)(STNixApiBuffer obj, const STNix_audioDesc* audioDesc, const NixUI8* audioDataPCM, const NixUI32 audioDataPCMBytes);
+    NixBOOL         (*fillWithZeroes)(STNixApiBuffer obj);
+} STNixApiBufferItf;
+
+typedef struct STNixApiSourceItf_ {
+    STNixApiSource  (*create)(STNixApiEngine eng);
+    void            (*destroy)(STNixApiSource obj);
+    void            (*setCallback)(STNixApiSource obj, void (*callback)(void* pEng, const NixUI32 sourceIndex, const NixUI32 ammBuffs), void* callbackEng, NixUI32 callbackSourceIndex);
+    NixBOOL         (*setVolume)(STNixApiSource obj, const float vol);
+    NixBOOL         (*setRepeat)(STNixApiSource obj, const NixBOOL isRepeat);
+    void            (*play)(STNixApiSource obj);
+    void            (*pause)(STNixApiSource obj);
+    void            (*stop)(STNixApiSource obj);
+    NixBOOL         (*isPlaying)(STNixApiSource obj);
+    NixBOOL         (*isPaused)(STNixApiSource obj);
+    NixBOOL         (*setBuffer)(STNixApiSource obj, STNixApiBuffer buff);  //static-source
+    NixBOOL         (*queueBuffer)(STNixApiSource obj, STNixApiBuffer buff); //stream-source
+} STNixApiSourceItf;
+
+typedef struct STNixApiRecorderItf_ {
+    STNixApiRecorder (*create)(STNixApiEngine eng, const STNix_audioDesc* audioDesc, const NixUI16 buffersCount, const NixUI16 samplesPerBuffer);
+    void            (*destroy)(STNixApiRecorder obj);
+    NixBOOL         (*setCallback)(STNixApiRecorder obj, NixApiCaptureBufferFilledCallback callback, void* callbackData);
+    NixBOOL         (*start)(STNixApiRecorder obj);
+    NixBOOL         (*stop)(STNixApiRecorder obj);
+} STNixApiRecorderItf;
+
+typedef struct STNixApiItf_ {
+    STNixApiEngineItf   engine;
+    STNixApiBufferItf   buffer;
+    STNixApiSourceItf   source;
+    STNixApiRecorderItf recorder;
+} STNixApiItf;
 
 //-------------------------------
 //-- ENGINES
@@ -102,12 +185,15 @@ typedef void (*PTRNIX_StreamBufferUnqueuedCallback)(STNix_Engine* engAbs, void* 
 typedef void (*PTRNIX_CaptureBufferFilledCallback)(STNix_Engine* engAbs, void* userdata, const STNix_audioDesc audioDesc, const NixUI8* audioData, const NixUI32 audioDataBytes, const NixUI32 audioDataSamples);
 
 //Engine
-NixUI8		nixInit(STNix_Engine* engAbs, const NixUI16 pregeneratedSources);
+NixBOOL		nixInit(STNix_Engine* engAbs, const NixUI16 pregeneratedSources);
+//NixBOOL   nixInitWithOpenAL(STNix_Engine* engAbs, const NixUI16 pregeneratedSources);     //Cross-platform
+//NixBOOL   nixInitWithAVFAudio(STNix_Engine* engAbs, const NixUI16 pregeneratedSources);   //Mac/iOS
+//NixBOOL   nixInitWithAAudio(STNix_Engine* engAbs, const NixUI16 pregeneratedSources);     //Android
 void		nixFinalize(STNix_Engine* engAbs);
 NixBOOL		nixContextIsActive(STNix_Engine* engAbs);
-NixBOOL		nixContextActivate(STNix_Engine* engAbs);
-NixBOOL		nixContextDeactivate(STNix_Engine* engAbs);
-//void		nixGetContext(STNix_Engine* engAbs, void* dest); //"dest" must be a "ALCcontext**" or "SLEngineItf*"
+NixBOOL		nixctxActivate(STNix_Engine* engAbs);
+NixBOOL		nixctxDeactivate(STNix_Engine* engAbs);
+//void		nixGetContext(STNix_Engine* engAbs, void* dest); //deprecated and removed: 2025-07-16
 void		nixGetStatusDesc(STNix_Engine* engAbs, STNix_StatusDesc* dest);
 NixUI32		nixCapabilities(STNix_Engine* engAbs);
 void		nixPrintCaps(STNix_Engine* engAbs);
@@ -116,6 +202,7 @@ void		nixTick(STNix_Engine* engAbs);
 //Buffers
 NixUI16		nixBufferWithData(STNix_Engine* engAbs, const STNix_audioDesc* audioDesc, const NixUI8* audioDataPCM, const NixUI32 audioDataPCMBytes);
 NixBOOL		nixBufferSetData(STNix_Engine* engAbs, const NixUI16 buffIndex, const STNix_audioDesc* audioDesc, const NixUI8* audioDataPCM, const NixUI32 audioDataPCMBytes);
+NixBOOL     nixBufferFillZeroes(STNix_Engine* engAbs, const NixUI16 buffIndex); //the unused range of the bufer will be zeroed
 NixUI32		nixBufferRetainCount(STNix_Engine* engAbs, const NixUI16 buffIndex);
 void		nixBufferRetain(STNix_Engine* engAbs, const NixUI16 buffIndex);
 void		nixBufferRelease(STNix_Engine* engAbs, const NixUI16 buffIndex);

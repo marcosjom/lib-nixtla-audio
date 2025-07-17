@@ -20,9 +20,6 @@
 #define NIX_ASSERTS_ACTIVATED
 //#define NIX_SILENT_MODE
 //#define NIX_VERBOSE_MODE
-//
-//#define NIX_FORCE_OPENAL   //if defined, forces OpenAL in Windows (instead of DirectX), Mac and iOS (instead of AVFAudio)
-
 
 //++++++++++++++++++++
 //++++++++++++++++++++
@@ -39,24 +36,23 @@
 #   define NIX_ASSERT(EVAL)     ((void)0);
 #endif
 
-//
-// You can custom memory management by defining this MACROS
-// and CONSTANTS before this file get included or compiled.
-//
-// This are the default memory management MACROS and CONSTANTS:
+// Memory allocations
+// You can custom memory management by defining these MACROS and CONSTANTS before this file get included or compiled.
+// These are the default memory management MACROS and CONSTANTS:
+
 #if !defined(NIX_MALLOC) || !defined(NIX_FREE)
     #include <stdlib.h>        //malloc, free
     #ifndef NIX_MALLOC
-        #define NIX_MALLOC(POINTER_DEST, POINTER_TYPE, SIZE_BYTES, STR_HINT) POINTER_DEST = (POINTER_TYPE*)malloc(SIZE_BYTES)
+#        define NIX_MALLOC(POINTER_DEST, POINTER_TYPE, SIZE_BYTES, STR_HINT) POINTER_DEST = (POINTER_TYPE*)malloc(SIZE_BYTES)
     #endif
     #ifndef NIX_FREE
-        #define NIX_FREE(POINTER) free(POINTER)
+#        define NIX_FREE(POINTER) free(POINTER)
     #endif
 #endif
 
 #ifndef NIX_MSWAIT_BEFORE_DELETING_BUFFERS
     #ifdef NIX_OPENAL
-        #define NIX_MSWAIT_BEFORE_DELETING_BUFFERS    250 //For some reason OpenAL fails when stopping, unqueuing and deleting buffers in the same tick
+#        define NIX_MSWAIT_BEFORE_DELETING_BUFFERS    250 //OpenAL fails when stopping, unqueuing and deleting buffers in the same tick
     #endif
 #endif
 
@@ -80,48 +76,71 @@
     #define NIX_AUDIO_GROUPS_SIZE 8
 #endif
 
+// Mutexes
+// You can custom mutexes by defining these MACROS and CONSTANTS before this file get included or compiled.
+// These are the default MACROS and CONSTANTS:
+#if !defined(NIX_MUTEX_T) || !defined(NIX_MUTEX_INIT) || !defined(NIX_MUTEX_DESTROY) || !defined(NIX_MUTEX_LOCK) || !defined(NIX_MUTEX_UNLOCK)
+#   ifdef _WIN32
+//#     define WIN32_LEAN_AND_MEAN
+#       include <windows.h>             //for CRITICAL_SECTION
+#       define NIX_MUTEX_T              CRITICAL_SECTION
+#       define NIX_MUTEX_INIT(PTR)      InitializeCriticalSection(PTR)
+#       define NIX_MUTEX_DESTROY(PTR)   DeleteCriticalSection(PTR)
+#       define NIX_MUTEX_LOCK(PTR)      EnterCriticalSection(PTR)
+#       define NIX_MUTEX_UNLOCK(PTR)    LeaveCriticalSection(PTR)
+#   else
+#       include <pthread.h>             //for pthread_mutex_t
+#       define NIX_MUTEX_T              pthread_mutex_t
+#       define NIX_MUTEX_INIT(PTR)      pthread_mutex_init(PTR, NULL)
+#       define NIX_MUTEX_DESTROY(PTR)   pthread_mutex_destroy(PTR)
+#       define NIX_MUTEX_LOCK(PTR)      pthread_mutex_lock(PTR)
+#       define NIX_MUTEX_UNLOCK(PTR)    pthread_mutex_unlock(PTR)
+#   endif
+#endif
+
 // PRINTING/LOG
 
 #if defined(__ANDROID__) //Android
-    #include <android/log.h>
-    #define NIX_PRINTF_ALLWAYS(STR_FMT, ...)        __android_log_print(ANDROID_LOG_INFO, "Nixtla", STR_FMT, ##__VA_ARGS__)
+#   include <android/log.h>
+#   define NIX_PRINTF_ALLWAYS(STR_FMT, ...)     __android_log_print(ANDROID_LOG_INFO, "Nixtla", STR_FMT, ##__VA_ARGS__)
 #elif defined(__QNX__) //BB10
-    #define NIX_PRINTF_ALLWAYS(STR_FMT, ...)        fprintf(stdout, "Nix, " STR_FMT, ##__VA_ARGS__); fflush(stdout)
+#   include <stdio.h>
+#   define NIX_PRINTF_ALLWAYS(STR_FMT, ...)     fprintf(stdout, "Nix, " STR_FMT, ##__VA_ARGS__); fflush(stdout)
 #else
-    #define NIX_PRINTF_ALLWAYS(STR_FMT, ...)        printf("Nix, " STR_FMT, ##__VA_ARGS__)
+#   include <stdio.h>
+#   define NIX_PRINTF_ALLWAYS(STR_FMT, ...)     printf("Nix, " STR_FMT, ##__VA_ARGS__)
 #endif
 
 #if defined(NIX_SILENT_MODE)
-    #define NIX_PRINTF_INFO(STR_FMT, ...)           ((void)0)
-    #define NIX_PRINTF_ERROR(STR_FMT, ...)          ((void)0)
-    #define NIX_PRINTF_WARNING(STR_FMT, ...)        ((void)0)
+#   define NIX_PRINTF_INFO(STR_FMT, ...)        ((void)0)
+#   define NIX_PRINTF_ERROR(STR_FMT, ...)       ((void)0)
+#   define NIX_PRINTF_WARNING(STR_FMT, ...)     ((void)0)
 #else
-    #if defined(__ANDROID__) //Android
-        #include <android/log.h>
-        #ifndef NIX_VERBOSE_MODE
-        #define NIX_PRINTF_INFO(STR_FMT, ...)        ((void)0)
-        #else
-        #define NIX_PRINTF_INFO(STR_FMT, ...)        __android_log_print(ANDROID_LOG_INFO, "Nixtla", STR_FMT, ##__VA_ARGS__)
-        #endif
-        #define NIX_PRINTF_ERROR(STR_FMT, ...)        __android_log_print(ANDROID_LOG_ERROR, "Nixtla", "ERROR, "STR_FMT, ##__VA_ARGS__)
-        #define NIX_PRINTF_WARNING(STR_FMT, ...)    __android_log_print(ANDROID_LOG_WARN, "Nixtla", "WARNING, "STR_FMT, ##__VA_ARGS__)
-    #elif defined(__QNX__) //BB10
-        #ifndef NIX_VERBOSE_MODE
-        #define NIX_PRINTF_INFO(STR_FMT, ...)        ((void)0)
-        #else
-        #define NIX_PRINTF_INFO(STR_FMT, ...)        fprintf(stdout, "Nix, " STR_FMT, ##__VA_ARGS__); fflush(stdout)
-        #endif
-        #define NIX_PRINTF_ERROR(STR_FMT, ...)        fprintf(stderr, "Nix ERROR, " STR_FMT, ##__VA_ARGS__); fflush(stderr)
-        #define NIX_PRINTF_WARNING(STR_FMT, ...)    fprintf(stdout, "Nix WARNING, " STR_FMT, ##__VA_ARGS__); fflush(stdout)
-    #else
-        #ifndef NIX_VERBOSE_MODE
-        #define NIX_PRINTF_INFO(STR_FMT, ...)        ((void)0)
-        #else
-        #define NIX_PRINTF_INFO(STR_FMT, ...)        printf("Nix, " STR_FMT, ##__VA_ARGS__)
-        #endif
-        #define NIX_PRINTF_ERROR(STR_FMT, ...)        printf("Nix ERROR, " STR_FMT, ##__VA_ARGS__)
-        #define NIX_PRINTF_WARNING(STR_FMT, ...)    printf("Nix WARNING, " STR_FMT, ##__VA_ARGS__)
-    #endif
+#   if defined(__ANDROID__) //Android
+#        ifndef NIX_VERBOSE_MODE
+#        define NIX_PRINTF_INFO(STR_FMT, ...)   ((void)0)
+#        else
+#        define NIX_PRINTF_INFO(STR_FMT, ...)   __android_log_print(ANDROID_LOG_INFO, "Nixtla", STR_FMT, ##__VA_ARGS__)
+#        endif
+#        define NIX_PRINTF_ERROR(STR_FMT, ...)  __android_log_print(ANDROID_LOG_ERROR, "Nixtla", "ERROR, "STR_FMT, ##__VA_ARGS__)
+#        define NIX_PRINTF_WARNING(STR_FMT, ...) __android_log_print(ANDROID_LOG_WARN, "Nixtla", "WARNING, "STR_FMT, ##__VA_ARGS__)
+#   elif defined(__QNX__) //BB10
+#        ifndef NIX_VERBOSE_MODE
+#        define NIX_PRINTF_INFO(STR_FMT, ...)   ((void)0)
+#        else
+#        define NIX_PRINTF_INFO(STR_FMT, ...)   fprintf(stdout, "Nix, " STR_FMT, ##__VA_ARGS__); fflush(stdout)
+#        endif
+#        define NIX_PRINTF_ERROR(STR_FMT, ...)  fprintf(stderr, "Nix ERROR, " STR_FMT, ##__VA_ARGS__); fflush(stderr)
+#        define NIX_PRINTF_WARNING(STR_FMT, ...) fprintf(stdout, "Nix WARNING, " STR_FMT, ##__VA_ARGS__); fflush(stdout)
+#   else
+#        ifndef NIX_VERBOSE_MODE
+#        define NIX_PRINTF_INFO(STR_FMT, ...)   ((void)0)
+#        else
+#        define NIX_PRINTF_INFO(STR_FMT, ...)   printf("Nix, " STR_FMT, ##__VA_ARGS__)
+#        endif
+#       define NIX_PRINTF_ERROR(STR_FMT, ...)   printf("Nix ERROR, " STR_FMT, ##__VA_ARGS__)
+#       define NIX_PRINTF_WARNING(STR_FMT, ...) printf("Nix WARNING, " STR_FMT, ##__VA_ARGS__)
+#   endif
 #endif
 
 #include "nixtla-audio.h"
@@ -129,34 +148,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-//AVFAudio interface to objective-c (iOS/MacOS)
-void*       nixAVAudioEngine_create(void);
-void        nixAVAudioEngine_destroy(void* obj);
-//
-void*       nixAVAudioRecorder_create(void* eng, const STNix_audioDesc* audioDesc, const NixUI16 buffersCount, const NixUI16 samplesPerBuffer);
-void        nixAVAudioRecorder_destroy(void* obj);
-NixBOOL     nixAVAudioRecorder_start(void* obj);
-NixBOOL     nixAVAudioRecorder_stop(void* obj);
-void        nixAVAudioRecorder_notifyBuffers(void* obj, STNix_Engine* engAbs, PTRNIX_CaptureBufferFilledCallback bufferCaptureCallback, void* bufferCaptureCallbackUserData);
-
-//
-void*       nixAVAudioSource_create(void* eng);
-void        nixAVAudioSource_destroy(void* obj);
-NixBOOL     nixAVAudioSource_setVolume(void* obj, const float vol);
-NixBOOL     nixAVAudioSource_setRepeat(void* obj, const NixBOOL isRepeat);
-void        nixAVAudioSource_play(void* obj);
-void        nixAVAudioSource_pause(void* obj);
-void        nixAVAudioSource_stop(void* obj);
-NixBOOL     nixAVAudioSource_isPlaying(void* obj);
-NixBOOL     nixAVAudioSource_isPaused(void* obj);
-NixBOOL     nixAVAudioSource_setBuffer(void* obj, void* buff, void (*callback)(void* pEng, NixUI32 sourceIndex), void* callbackEng, NixUI32 callbackSourceIndex);  //static-source
-NixBOOL     nixAVAudioSource_queueBuffer(void* obj, void* buff, void (*callback)(void* pEng, NixUI32 sourceIndex), void* pEng, NixUI32 sourceIndex); //stream-source
-//
-void*       nixAVAudioPCMBuffer_create(const STNix_audioDesc* audioDesc, const NixUI8* audioDataPCM, const NixUI32 audioDataPCMBytes);
-void        nixAVAudioPCMBuffer_destroy(void* obj);
-NixBOOL     nixAVAudioPCMBuffer_setData(void* obj, const STNix_audioDesc* audioDesc, const NixUI8* audioDataPCM, const NixUI32 audioDataPCMBytes);
-
 
 #ifdef __cplusplus
 }

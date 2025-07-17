@@ -222,9 +222,9 @@ STFileStatus files[] = {
 			}
 			//Load and play wav
 			if(!loadDataFromWavFile([[NSString stringWithFormat:@"%@/%@", [[NSBundle mainBundle] bundlePath], wavFile] UTF8String], &audioDesc, &audioData, &audioDataBytes)){
-				printf("ERROR, WAV file load failed.\n");
+				printf("ERROR, WAV file load failed: '%s'.\n", [wavFile UTF8String]);
 			} else {
-				//printf("WAV file loaded.\n");
+				printf("WAV file loaded: '%s'.\n", [wavFile UTF8String]);
 				iSourceWav = nixSourceAssignStatic(&_nix, 1, 0, NULL, NULL);
 				if(iSourceWav == 0){
 					printf("ERROR, Source assign failed.\n");

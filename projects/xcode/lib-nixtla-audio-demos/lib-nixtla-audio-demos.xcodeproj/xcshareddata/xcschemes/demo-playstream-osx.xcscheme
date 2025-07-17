@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2C606C002E20217900FB8AB8"
-               BuildableName = "test-samples-conversion-osx"
-               BlueprintName = "test-samples-conversion-osx"
+               BlueprintIdentifier = "2CB90A072E28195F009E9850"
+               BuildableName = "demo-playstream-osx"
+               BlueprintName = "demo-playstream-osx"
                ReferencedContainer = "container:lib-nixtla-audio-demos.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,9 +46,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2C606C002E20217900FB8AB8"
-            BuildableName = "test-samples-conversion-osx"
-            BlueprintName = "test-samples-conversion-osx"
+            BlueprintIdentifier = "2CB90A072E28195F009E9850"
+            BuildableName = "demo-playstream-osx"
+            BlueprintName = "demo-playstream-osx"
             ReferencedContainer = "container:lib-nixtla-audio-demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -63,9 +63,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2C606C002E20217900FB8AB8"
-            BuildableName = "test-samples-conversion-osx"
-            BlueprintName = "test-samples-conversion-osx"
+            BlueprintIdentifier = "2CB90A072E28195F009E9850"
+            BuildableName = "demo-playstream-osx"
+            BlueprintName = "demo-playstream-osx"
             ReferencedContainer = "container:lib-nixtla-audio-demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

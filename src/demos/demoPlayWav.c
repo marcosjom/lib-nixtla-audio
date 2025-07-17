@@ -7,7 +7,8 @@
 //
 
 #include <stdio.h>	//printf
-#include <stdlib.h>	//malloc, free
+#include <stdlib.h>	//malloc, free, rand
+#include <time.h>   //time
 #include <string.h> //memset
 
 #if defined(_WIN32) || defined(WIN32)
@@ -20,21 +21,26 @@
 #endif
 
 #include "nixtla-audio.h"
-#include "../utils/utilLoadWav.c"
+#include "../utils/utilFilesList.h"
+#include "../utils/utilLoadWav.h"
 
 int main(int argc, const char * argv[]){
-	STNix_Engine nix;
+    STNix_Engine nix;
+    //
+    srand((unsigned int)time(NULL));
+    //
 	if(nixInit(&nix, 8)){
         nixPrintCaps(&nix);
         NixUI16 iSourcePlay = 0;
-		const char* strWavPath = "./res/beat_stereo_16_22050.wav";
+        //randomly select a wav from the list
+		const char* strWavPath = _nixUtilFilesList[rand() % (sizeof(_nixUtilFilesList) / sizeof(_nixUtilFilesList[0]))];
         NixUI8* audioData = NULL;
         NixUI32 audioDataBytes = 0;
         STNix_audioDesc audioDesc;
 		if(!loadDataFromWavFile(strWavPath, &audioDesc, &audioData, &audioDataBytes)){
-			printf("ERROR, loading WAV file.\n");
+			printf("ERROR, loading WAV file: '%s'.\n", strWavPath);
 		} else {
-			printf("WAV file loaded.\n");
+			printf("WAV file loaded: '%s'.\n", strWavPath);
             iSourcePlay = nixSourceAssignStatic(&nix, NIX_TRUE, 0, NULL, NULL);
 			if(iSourcePlay == 0){
 				printf("Source assign failed.\n");
@@ -53,10 +59,17 @@ int main(int argc, const char * argv[]){
 						nixSourceSetVolume(&nix, iSourcePlay, 1.0f);
 						nixSourcePlay(&nix, iSourcePlay);
 					}
+                    //release buffer (already retained by source if success)
+                    nixBufferRelease(&nix, iBufferWav);
+                    iBufferWav = 0;
 				}
 			}
 		}
-		if(audioData!=NULL) free(audioData); audioData = NULL;
+        //wav samples already loaded into buffer
+        if(audioData != NULL){
+            free(audioData);
+            audioData = NULL;
+        }
 		//
 		//Infinite loop, usually sync with your program main loop, or in a independent thread
 		//
@@ -76,7 +89,10 @@ int main(int argc, const char * argv[]){
             }
         }
 		//
-		if(iSourcePlay != 0) nixSourceRelease(&nix, iSourcePlay);
+        if(iSourcePlay != 0){
+            nixSourceRelease(&nix, iSourcePlay);
+            iSourcePlay = 0;
+        }
 		nixFinalize(&nix);
 	}
     return 0;

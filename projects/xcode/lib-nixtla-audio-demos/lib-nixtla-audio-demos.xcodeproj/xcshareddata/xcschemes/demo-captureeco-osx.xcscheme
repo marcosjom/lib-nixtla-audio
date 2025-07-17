@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2C4C74D218CE15BA00B67543"
-               BuildableName = "playwav-osx"
-               BlueprintName = "playwav-osx"
+               BlueprintIdentifier = "2C4C74E318CE199700B67543"
+               BuildableName = "demo-captureeco-osx"
+               BlueprintName = "demo-captureeco-osx"
                ReferencedContainer = "container:lib-nixtla-audio-demos.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -35,8 +35,7 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
-      useCustomWorkingDirectory = "YES"
-      customWorkingDirectory = "/Users/mortegam/Desktop/NIBSA_proyectos/CltMarcosOrtega/sys-auframework/lib-nixtla-audio-src"
+      useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
@@ -46,9 +45,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2C4C74D218CE15BA00B67543"
-            BuildableName = "playwav-osx"
-            BlueprintName = "playwav-osx"
+            BlueprintIdentifier = "2C4C74E318CE199700B67543"
+            BuildableName = "demo-captureeco-osx"
+            BlueprintName = "demo-captureeco-osx"
             ReferencedContainer = "container:lib-nixtla-audio-demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -63,9 +62,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "2C4C74D218CE15BA00B67543"
-            BuildableName = "playwav-osx"
-            BlueprintName = "playwav-osx"
+            BlueprintIdentifier = "2C4C74E318CE199700B67543"
+            BuildableName = "demo-captureeco-osx"
+            BlueprintName = "demo-captureeco-osx"
             ReferencedContainer = "container:lib-nixtla-audio-demos.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

@@ -34,6 +34,7 @@ STNB_MemMap memmap;
 	}
 #include "nixtla-audio.h"
 #include "../nixtla-audio.c"
+
 //In this test, we include the "source" file to implement customized memory allocation.
 //The "nixtla-audio.c" file is not part of the project tree.
 

@@ -7,7 +7,8 @@
 //
 
 #include <stdio.h>  //printf
-#include <stdlib.h> //malloc, free
+#include <stdlib.h> //malloc, free, rand
+#include <time.h>   //time
 #include <string.h> //memset
 
 #if defined(_WIN32) || defined(WIN32)
@@ -20,43 +21,59 @@
 #endif
 
 #include "nixtla-audio.h"
-#include "../utils/utilLoadWav.c"
+#include "../utils/utilFilesList.h"
+#include "../utils/utilLoadWav.h"
 
 int main(int argc, const char * argv[]){
     STNix_Engine nix;
+    //
+    srand((unsigned int)time(NULL));
+    //
     if(nixInit(&nix, 8)){
         nixPrintCaps(&nix);
-        const char* strWavPath = "./res/beat_stereo_16_22050.wav";
+        //randomly select a wav from the list
+        const char* strWavPath = _nixUtilFilesList[rand() % (sizeof(_nixUtilFilesList) / sizeof(_nixUtilFilesList[0]))];
+        //original source
         NixUI16 iSourceOrg = 0, iSourceOrgPlayCount = 0;
         NixUI8* audioData = NULL;
         NixUI32 audioDataBytes = 0;
         STNix_audioDesc audioDesc;
-        //
+        //converted source
         NixUI16 iSourceConv = 0, iSourceConvPlayCount = 0;
         NixUI8* audioDataConv = NULL;
         NixUI32 audioDataBytesConv = 0;
         STNix_audioDesc audioDescConv;
         //
         if(!loadDataFromWavFile(strWavPath, &audioDesc, &audioData, &audioDataBytes)){
-            printf("ERROR, loading WAV file.\n");
+            printf("ERROR, loading WAV file: '%s'.\n", strWavPath);
         } else {
-            printf("WAV file loaded.\n");
-            iSourceOrg = nixSourceAssignStatic(&nix, NIX_TRUE, 0, NULL, NULL);
-            if(iSourceOrg == 0){
+            printf("WAV file loaded: '%s'.\n", strWavPath);
+            NixUI16 iSrcTmp = nixSourceAssignStatic(&nix, NIX_TRUE, 0, NULL, NULL);
+            if(iSrcTmp == 0){
                 printf("Source assign failed.\n");
             } else {
                 NixUI16 iBufferWav = nixBufferWithData(&nix, &audioDesc, audioData, audioDataBytes);
                 if(iBufferWav == 0){
                     printf("Buffer assign failed.\n");
                 } else {
-                    if(!nixSourceSetBuffer(&nix, iSourceOrg, iBufferWav)){
+                    if(!nixSourceSetBuffer(&nix, iSrcTmp, iBufferWav)){
                         printf("Buffer-to-source linking failed.\n");
                     } else {
                         printf("origin playing %u time(s).\n", iSourceOrgPlayCount + 1);
-                        nixSourceSetVolume(&nix, iSourceOrg, 1.0f);
-                        nixSourcePlay(&nix, iSourceOrg);
+                        //retain source
+                        iSourceOrg = iSrcTmp;
+                        nixSourceRetain(&nix, iSrcTmp);
+                        //start
+                        nixSourceSetVolume(&nix, iSrcTmp, 1.0f);
+                        nixSourcePlay(&nix, iSrcTmp);
                     }
+                    //release buffer (already retained by source if success)
+                    nixBufferRelease(&nix, iBufferWav);
+                    iBufferWav = 0;
                 }
+                //release source
+                nixSourceRelease(&nix, iSrcTmp);
+                iSrcTmp = 0;
             }
         }
         //
@@ -174,22 +191,33 @@ int main(int argc, const char * argv[]){
                                                     printf("Buffer-to-source linking failed.\n");
                                                 } else {
                                                     iSourceConvPlayCount = 0;
+                                                    //assign as new source
+                                                    {
+                                                        //retain new source
+                                                        nixSourceRetain(&nix, iSrcConv);
+                                                        //release previous source
+                                                        if(iSourceConv != 0){
+                                                            nixSourceRelease(&nix, iSourceConv);
+                                                            iSourceConv = 0;
+                                                        }
+                                                        //assign
+                                                        iSourceConv = iSrcConv;
+                                                    }
+                                                    //
                                                     printf("converted played %u time(s).\n", iSourceConvPlayCount + 1);
                                                     nixSourceSetVolume(&nix, iSrcConv, 1.0f);
                                                     nixSourcePlay(&nix, iSrcConv);
-                                                    nixSourceRetain(&nix, iSrcConv);
-                                                    if(iSourceConv != 0){
-                                                        nixSourceRelease(&nix, iSourceConv);
-                                                        iSourceConv = 0;
-                                                    }
-                                                    iSourceConv = iSrcConv;
                                                 }
+                                                //release buffer (already retained by source if success)
+                                                nixBufferRelease(&nix, iBufferWav);
+                                                iBufferWav = 0;
                                             }
                                             nixSourceRelease(&nix, iSrcConv);
                                             iSrcConv = 0;
                                         }
                                     }
                                     nixFmtConverter_destroy(conv);
+                                    conv = NULL;
                                 }
                             }
                         }
@@ -202,13 +230,13 @@ int main(int argc, const char * argv[]){
             free(audioData);
             audioData = NULL;
         }
-        if(iSourceOrg != 0){
-            nixSourceRelease(&nix, iSourceOrg);
-            iSourceOrg = 0;
-        }
         if(audioDataConv != NULL){
             free(audioDataConv);
             audioDataConv = NULL;
+        }
+        if(iSourceOrg != 0){
+            nixSourceRelease(&nix, iSourceOrg);
+            iSourceOrg = 0;
         }
         if(iSourceConv != 0){
             nixSourceRelease(&nix, iSourceConv);

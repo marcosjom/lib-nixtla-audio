@@ -34,10 +34,12 @@ STNB_MemMap memmap;
 	}
 #include "nixtla-audio.h"
 #include "../nixtla-audio.c"
+
 //In this demo, we include the "source" file to implement customized memory allocation.
 //The "nixtla-audio.c" file is not part of the project tree.
 
-#include "../utils/utilLoadWav.c"
+#include "../utils/utilFilesList.h"
+#include "../utils/utilLoadWav.h"
 
 void printMemReport();
 void loadAndPlayWav(STNix_Engine* nix, const char* strWavPath, NixUI16* iSourceWav, NixUI16* iBufferWav);
@@ -52,7 +54,9 @@ int main(int argc, const char * argv[]) {
 		nixPrintCaps(&nix);
 		//Load and play wav file
 		NixUI16 iSourceWav = 0; NixUI16 iBufferWav = 0;
-		loadAndPlayWav(&nix, "./res/audioTest.wav", &iSourceWav, &iBufferWav);
+        //randomly select a wav from the list
+        const char* strWavPath = _nixUtilFilesList[rand() % (sizeof(_nixUtilFilesList) / sizeof(_nixUtilFilesList[0]))];
+		loadAndPlayWav(&nix, strWavPath, &iSourceWav, &iBufferWav);
 		//Source for stream eco (play the captured audio)
 		iSourceStrm = nixSourceAssignStream(&nix, 1, 0, NULL, NULL, 4, NULL, NULL);
 		if(iSourceStrm != 0){
@@ -111,9 +115,9 @@ void loadAndPlayWav(STNix_Engine* nix, const char* strWavPath, NixUI16* p_iSourc
 	NixUI8* audioData = NULL;
     NixUI32 audioDataBytes = 0;
 	if(!loadDataFromWavFile(strWavPath, &audioDesc, &audioData, &audioDataBytes)){
-		printf("ERROR, loading WAV file.\n");
+		printf("ERROR, loading WAV file: '%s'.\n", strWavPath);
 	} else {
-		printf("WAV file loaded.\n");
+		printf("WAV file loaded: '%s'.\n", strWavPath);
 		iSourceWav = nixSourceAssignStatic(nix, 1, 0, NULL, NULL);
 		if(iSourceWav == 0){
 			printf("Source assign failed.\n");
