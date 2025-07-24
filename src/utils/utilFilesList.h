@@ -1,13 +1,16 @@
 //
-//  main.c
-//  NixtlaDemo
+//  Nixtla
 //
-//  Created by Marcos Ortega on 11/02/14.
-//  Copyright (c) 2014 NIBSA. All rights reserved.
+//  Created by Marcos Ortega on 20/07/25.
+//  Copyright (c) 2014 Marcos Ortega. All rights reserved.
 //
 
 #ifndef NIXTLA_UTIL_FILES_LIST_H
 #define NIXTLA_UTIL_FILES_LIST_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 static const char* _nixUtilFilesList[] = {
     "res/beat_mono_08_08000.wav"
@@ -43,5 +46,9 @@ static const char* _nixUtilFilesList[] = {
     , "res/beat_stereo_32_22050.wav"
     , "res/beat_stereo_32_44100.wav"
 };
+
+#ifdef __cplusplus
+} //extern "C"
+#endif
 
 #endif

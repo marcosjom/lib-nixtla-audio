@@ -1,8 +1,8 @@
 //
-//  NixtlaDemo
+//  Nixtla
 //
-//  Created by Marcos Ortega on 11/02/14.
-//  Copyright (c) 2014 NIBSA. All rights reserved.
+//  Created by Marcos Ortega on 20/07/25.
+//  Copyright (c) 2014 Marcos Ortega. All rights reserved.
 //
 
 #ifndef NIXTLA_UTIL_LOAD_WAV_H
@@ -18,15 +18,15 @@
 extern "C" {
 #endif
 
-NixUI8 loadDataFromWavFile(
+NixUI8 nixUtilLoadDataFromWavFile(
 #                           ifdef __ANDROID__
-                            JNIEnv *env, jobject assetManager,
+                                  JNIEnv *env, jobject assetManager,
 #                           endif
-                            const char* pathToWav, STNix_audioDesc* audioDesc, NixUI8** audioData, NixUI32* audioDataBytes
-                           );
+                                  const char* pathToWav, STNixAudioDesc* audioDesc, NixUI8** audioData, NixUI32* audioDataBytes
+                                  );
 
 #ifdef __cplusplus
-}
+} //extern "C"
 #endif
 
 #endif

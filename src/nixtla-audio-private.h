@@ -17,7 +17,7 @@
 #ifndef NixtlaAudioLib_nixtla_private_h
 #define NixtlaAudioLib_nixtla_private_h
 
-#define NIX_ASSERTS_ACTIVATED
+#define NIX_DEBUG
 //#define NIX_SILENT_MODE
 //#define NIX_VERBOSE_MODE
 
@@ -29,25 +29,15 @@
 //++++++++++++++++++++
 //++++++++++++++++++++
 
+#ifdef NIX_DEBUG
+#   define NIX_ASSERTS_ACTIVATED
+#endif
+
 #ifdef NIX_ASSERTS_ACTIVATED
     #include <assert.h>         //assert
 #   define NIX_ASSERT(EVAL)     { if(!(EVAL)){ NIX_PRINTF_ERROR("ASSERT, cond '"#EVAL"'.\n"); NIX_PRINTF_ERROR("ASSERT, file '%s'\n", __FILE__); NIX_PRINTF_ERROR("ASSERT, line %d.\n", __LINE__); assert(0); }}
 #else
 #   define NIX_ASSERT(EVAL)     ((void)0);
-#endif
-
-// Memory allocations
-// You can custom memory management by defining these MACROS and CONSTANTS before this file get included or compiled.
-// These are the default memory management MACROS and CONSTANTS:
-
-#if !defined(NIX_MALLOC) || !defined(NIX_FREE)
-    #include <stdlib.h>        //malloc, free
-    #ifndef NIX_MALLOC
-#        define NIX_MALLOC(POINTER_DEST, POINTER_TYPE, SIZE_BYTES, STR_HINT) POINTER_DEST = (POINTER_TYPE*)malloc(SIZE_BYTES)
-    #endif
-    #ifndef NIX_FREE
-#        define NIX_FREE(POINTER) free(POINTER)
-    #endif
 #endif
 
 #ifndef NIX_MSWAIT_BEFORE_DELETING_BUFFERS
@@ -74,28 +64,6 @@
 
 #ifndef NIX_AUDIO_GROUPS_SIZE
     #define NIX_AUDIO_GROUPS_SIZE 8
-#endif
-
-// Mutexes
-// You can custom mutexes by defining these MACROS and CONSTANTS before this file get included or compiled.
-// These are the default MACROS and CONSTANTS:
-#if !defined(NIX_MUTEX_T) || !defined(NIX_MUTEX_INIT) || !defined(NIX_MUTEX_DESTROY) || !defined(NIX_MUTEX_LOCK) || !defined(NIX_MUTEX_UNLOCK)
-#   ifdef _WIN32
-//#     define WIN32_LEAN_AND_MEAN
-#       include <windows.h>             //for CRITICAL_SECTION
-#       define NIX_MUTEX_T              CRITICAL_SECTION
-#       define NIX_MUTEX_INIT(PTR)      InitializeCriticalSection(PTR)
-#       define NIX_MUTEX_DESTROY(PTR)   DeleteCriticalSection(PTR)
-#       define NIX_MUTEX_LOCK(PTR)      EnterCriticalSection(PTR)
-#       define NIX_MUTEX_UNLOCK(PTR)    LeaveCriticalSection(PTR)
-#   else
-#       include <pthread.h>             //for pthread_mutex_t
-#       define NIX_MUTEX_T              pthread_mutex_t
-#       define NIX_MUTEX_INIT(PTR)      pthread_mutex_init(PTR, NULL)
-#       define NIX_MUTEX_DESTROY(PTR)   pthread_mutex_destroy(PTR)
-#       define NIX_MUTEX_LOCK(PTR)      pthread_mutex_lock(PTR)
-#       define NIX_MUTEX_UNLOCK(PTR)    pthread_mutex_unlock(PTR)
-#   endif
 #endif
 
 // PRINTING/LOG
