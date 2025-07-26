@@ -7,6 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2C284F5D2E2D6C98008456BF /* NixMemMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F5C2E2D6C98008456BF /* NixMemMap.c */; };
+		2C284F5E2E2D6C98008456BF /* NixMemMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F5C2E2D6C98008456BF /* NixMemMap.c */; };
+		2C284F5F2E2D6C98008456BF /* NixMemMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F5C2E2D6C98008456BF /* NixMemMap.c */; };
+		2C284F602E2D6C98008456BF /* NixMemMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F5C2E2D6C98008456BF /* NixMemMap.c */; };
+		2C284F612E2D6C98008456BF /* NixMemMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F5C2E2D6C98008456BF /* NixMemMap.c */; };
+		2C284F642E2D7DF4008456BF /* NixDbg.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F632E2D6D81008456BF /* NixDbg.c */; };
+		2C284F652E2D7DF4008456BF /* NixDbg.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F632E2D6D81008456BF /* NixDbg.c */; };
+		2C284F6B2E2D921F008456BF /* NixDemosCommon.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F6A2E2D921F008456BF /* NixDemosCommon.c */; };
+		2C284F6C2E2D921F008456BF /* NixDemosCommon.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F6A2E2D921F008456BF /* NixDemosCommon.c */; };
+		2C284F6D2E2D921F008456BF /* NixDemosCommon.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F6A2E2D921F008456BF /* NixDemosCommon.c */; };
+		2C284F6E2E2D921F008456BF /* NixDemosCommon.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F6A2E2D921F008456BF /* NixDemosCommon.c */; };
+		2C284F6F2E2D921F008456BF /* NixDemosCommon.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F6A2E2D921F008456BF /* NixDemosCommon.c */; };
+		2C284F712E2E6529008456BF /* NixDemoPlayWav.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F702E2E64B0008456BF /* NixDemoPlayWav.c */; };
+		2C284F742E2E717C008456BF /* NixDemoPlayStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F732E2E717C008456BF /* NixDemoPlayStream.c */; };
+		2C284F772E2E742A008456BF /* NixDemoCaptureEco.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F762E2E742A008456BF /* NixDemoCaptureEco.c */; };
+		2C284F7A2E2E7C30008456BF /* NixTestSamplesConverter.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C284F792E2E7C30008456BF /* NixTestSamplesConverter.c */; };
 		2C4C74EF18CE1A1600B67543 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C6412AB18C9261B00E4F7A2 /* OpenAL.framework */; };
 		2C4C74F018CE1A2100B67543 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C6412AB18C9261B00E4F7A2 /* OpenAL.framework */; };
 		2C4C74F718CE1ABC00B67543 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C4C74F618CE1ABC00B67543 /* Foundation.framework */; };
@@ -41,7 +57,6 @@
 		2C606C0E2E20257C00FB8AB8 /* AVFAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C606BE92E1FC0F600FB8AB8 /* AVFAudio.framework */; };
 		2C606C182E20264600FB8AB8 /* demoPlayWav.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C606C172E20261700FB8AB8 /* demoPlayWav.c */; };
 		2C606C192E20264C00FB8AB8 /* demoCaptureEco.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C606C162E20261700FB8AB8 /* demoCaptureEco.c */; };
-		2C606C1A2E20265400FB8AB8 /* testMemLeakMain.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C606C112E20260800FB8AB8 /* testMemLeakMain.c */; };
 		2C606C1B2E20266B00FB8AB8 /* testSamplesConversion.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C606C142E20260800FB8AB8 /* testSamplesConversion.c */; };
 		2C83375618D162C6007CE46D /* Main_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2C4C750818CE1ABD00B67543 /* Main_iPhone.storyboard */; };
 		2C83375718D162C6007CE46D /* Main_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2C4C750B18CE1ABD00B67543 /* Main_iPad.storyboard */; };
@@ -82,7 +97,6 @@
 		2CB909F02E268DCB009E9850 /* utilLoadWav.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C606BF92E2020FC00FB8AB8 /* utilLoadWav.c */; };
 		2CB909F12E268DCB009E9850 /* utilLoadWav.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C606BF92E2020FC00FB8AB8 /* utilLoadWav.c */; };
 		2CB909F22E268DCB009E9850 /* utilLoadWav.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C606BF92E2020FC00FB8AB8 /* utilLoadWav.c */; };
-		2CB909F32E268F32009E9850 /* testMemMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C606C132E20260800FB8AB8 /* testMemMap.c */; };
 		2CB90A0F2E2819B3009E9850 /* demoPlayStream.c in Sources */ = {isa = PBXBuildFile; fileRef = 2CB90A032E281927009E9850 /* demoPlayStream.c */; };
 		2CB90A102E28201C009E9850 /* utilLoadWav.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C606BF92E2020FC00FB8AB8 /* utilLoadWav.c */; };
 		2CB90A112E28205D009E9850 /* libnixtla-audio-osx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C606C092E20254B00FB8AB8 /* libnixtla-audio-osx.a */; };
@@ -147,6 +161,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2C284F5B2E2D6C98008456BF /* NixMemMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixMemMap.h; path = ../../../src/utils/NixMemMap.h; sourceTree = SOURCE_ROOT; };
+		2C284F5C2E2D6C98008456BF /* NixMemMap.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixMemMap.c; path = ../../../src/utils/NixMemMap.c; sourceTree = SOURCE_ROOT; };
+		2C284F622E2D6D81008456BF /* NixDbg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixDbg.h; path = ../../../src/utils/NixDbg.h; sourceTree = SOURCE_ROOT; };
+		2C284F632E2D6D81008456BF /* NixDbg.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixDbg.c; path = ../../../src/utils/NixDbg.c; sourceTree = SOURCE_ROOT; };
+		2C284F682E2D911A008456BF /* NixDemoPlayWav.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixDemoPlayWav.h; path = ../../../src/demos/NixDemoPlayWav.h; sourceTree = SOURCE_ROOT; };
+		2C284F692E2D921F008456BF /* NixDemosCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixDemosCommon.h; path = ../../../src/demos/NixDemosCommon.h; sourceTree = SOURCE_ROOT; };
+		2C284F6A2E2D921F008456BF /* NixDemosCommon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixDemosCommon.c; path = ../../../src/demos/NixDemosCommon.c; sourceTree = SOURCE_ROOT; };
+		2C284F702E2E64B0008456BF /* NixDemoPlayWav.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixDemoPlayWav.c; path = ../../../src/demos/NixDemoPlayWav.c; sourceTree = SOURCE_ROOT; };
+		2C284F722E2E717C008456BF /* NixDemoPlayStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixDemoPlayStream.h; path = ../../../src/demos/NixDemoPlayStream.h; sourceTree = SOURCE_ROOT; };
+		2C284F732E2E717C008456BF /* NixDemoPlayStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixDemoPlayStream.c; path = ../../../src/demos/NixDemoPlayStream.c; sourceTree = SOURCE_ROOT; };
+		2C284F752E2E742A008456BF /* NixDemoCaptureEco.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixDemoCaptureEco.h; path = ../../../src/demos/NixDemoCaptureEco.h; sourceTree = SOURCE_ROOT; };
+		2C284F762E2E742A008456BF /* NixDemoCaptureEco.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixDemoCaptureEco.c; path = ../../../src/demos/NixDemoCaptureEco.c; sourceTree = SOURCE_ROOT; };
+		2C284F782E2E7C30008456BF /* NixTestSamplesConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixTestSamplesConverter.h; path = ../../../src/tests/NixTestSamplesConverter.h; sourceTree = SOURCE_ROOT; };
+		2C284F792E2E7C30008456BF /* NixTestSamplesConverter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixTestSamplesConverter.c; path = ../../../src/tests/NixTestSamplesConverter.c; sourceTree = SOURCE_ROOT; };
 		2C4C74D318CE15BA00B67543 /* demo-playwav-osx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "demo-playwav-osx"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C4C74E418CE199700B67543 /* demo-captureeco-osx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "demo-captureeco-osx"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C4C74F518CE1ABC00B67543 /* demo-playwav-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "demo-playwav-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -183,11 +211,7 @@
 		2C606BF92E2020FC00FB8AB8 /* utilLoadWav.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = utilLoadWav.c; path = ../../../src/utils/utilLoadWav.c; sourceTree = SOURCE_ROOT; };
 		2C606C012E20217900FB8AB8 /* test-samples-conversion-osx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "test-samples-conversion-osx"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C606C092E20254B00FB8AB8 /* libnixtla-audio-osx.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libnixtla-audio-osx.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2C606C112E20260800FB8AB8 /* testMemLeakMain.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = testMemLeakMain.c; path = ../../../src/tests/testMemLeakMain.c; sourceTree = SOURCE_ROOT; };
-		2C606C122E20260800FB8AB8 /* testMemMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = testMemMap.h; path = ../../../src/tests/testMemMap.h; sourceTree = SOURCE_ROOT; };
-		2C606C132E20260800FB8AB8 /* testMemMap.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = testMemMap.c; path = ../../../src/tests/testMemMap.c; sourceTree = SOURCE_ROOT; };
 		2C606C142E20260800FB8AB8 /* testSamplesConversion.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = testSamplesConversion.c; path = ../../../src/tests/testSamplesConversion.c; sourceTree = SOURCE_ROOT; };
-		2C606C152E20260800FB8AB8 /* testStress.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = testStress.c; path = ../../../src/tests/testStress.c; sourceTree = SOURCE_ROOT; };
 		2C606C162E20261700FB8AB8 /* demoCaptureEco.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demoCaptureEco.c; path = ../../../src/demos/demoCaptureEco.c; sourceTree = SOURCE_ROOT; };
 		2C606C172E20261700FB8AB8 /* demoPlayWav.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demoPlayWav.c; path = ../../../src/demos/demoPlayWav.c; sourceTree = SOURCE_ROOT; };
 		2C6412AB18C9261B00E4F7A2 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
@@ -225,13 +249,11 @@
 		2CB6A25F18D10A05006A1ACC /* beat_stereo_16_11025.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = beat_stereo_16_11025.wav; path = ../../../res/beat_stereo_16_11025.wav; sourceTree = SOURCE_ROOT; };
 		2CB6A26018D10A05006A1ACC /* beat_stereo_16_22050.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = beat_stereo_16_22050.wav; path = ../../../res/beat_stereo_16_22050.wav; sourceTree = SOURCE_ROOT; };
 		2CB6A26118D10A05006A1ACC /* beat_stereo_16_44100.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = beat_stereo_16_44100.wav; path = ../../../res/beat_stereo_16_44100.wav; sourceTree = SOURCE_ROOT; };
-		2CB909EB2E254DFD009E9850 /* demoPlayWavAndroid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demoPlayWavAndroid.c; path = ../../../src/demos/demoPlayWavAndroid.c; sourceTree = SOURCE_ROOT; };
+		2CB909EB2E254DFD009E9850 /* demosAndroid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demosAndroid.c; path = ../../../src/demos/demosAndroid.c; sourceTree = SOURCE_ROOT; };
 		2CB909EC2E25A839009E9850 /* utilFilesList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = utilFilesList.h; path = ../../../src/utils/utilFilesList.h; sourceTree = SOURCE_ROOT; };
-		2CB909ED2E267C1A009E9850 /* testSamplesConversionAndroid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = testSamplesConversionAndroid.c; path = "/Volumes/MacSSD_HFS/NIBSA_proyectos/CltMarcosOrtega/sys-auframework/lib-nixtla-audio-src/src/tests/testSamplesConversionAndroid.c"; sourceTree = "<absolute>"; };
-		2CB909EE2E267E91009E9850 /* utilLoadWav.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = utilLoadWav.h; path = "/Volumes/MacSSD_HFS/NIBSA_proyectos/CltMarcosOrtega/sys-auframework/lib-nixtla-audio-src/src/utils/utilLoadWav.h"; sourceTree = "<absolute>"; };
-		2CB90A032E281927009E9850 /* demoPlayStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demoPlayStream.c; path = "/Volumes/MacSSD_HFS/NIBSA_proyectos/CltMarcosOrtega/sys-auframework/lib-nixtla-audio-src/src/demos/demoPlayStream.c"; sourceTree = "<absolute>"; };
+		2CB909EE2E267E91009E9850 /* utilLoadWav.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = utilLoadWav.h; path = ../../../src/utils/utilLoadWav.h; sourceTree = SOURCE_ROOT; };
+		2CB90A032E281927009E9850 /* demoPlayStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demoPlayStream.c; path = ../../../src/demos/demoPlayStream.c; sourceTree = SOURCE_ROOT; };
 		2CB90A082E28195F009E9850 /* demo-playstream-osx */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "demo-playstream-osx"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2CB90A152E2828D7009E9850 /* demoPlayStreamAndroid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demoPlayStreamAndroid.c; path = "/Volumes/MacSSD_HFS/NIBSA_proyectos/CltMarcosOrtega/sys-auframework/lib-nixtla-audio-src/src/demos/demoPlayStreamAndroid.c"; sourceTree = "<absolute>"; };
 		2CC99A6018D3E2F6006F04B3 /* libnixtla-audio-osx.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libnixtla-audio-osx.a"; path = "../../../../../../../Library/Developer/Xcode/DerivedData/lib-nixtla-audio-gkdinsdugdtgbuduqhthvvfaspzu/Build/Products/Debug/libnixtla-audio-osx.a"; sourceTree = "<group>"; };
 		2CC99A6418D3E329006F04B3 /* libnixtla-audio-ios.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libnixtla-audio-ios.a"; path = "../lib-nixtla-audio/build/Debug-iphoneos/libnixtla-audio-ios.a"; sourceTree = "<group>"; };
 		2CC99A6618D3E337006F04B3 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk/System/Library/Frameworks/OpenAL.framework; sourceTree = DEVELOPER_DIR; };
@@ -412,6 +434,10 @@
 		2C606BF82E2020DE00FB8AB8 /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				2C284F622E2D6D81008456BF /* NixDbg.h */,
+				2C284F632E2D6D81008456BF /* NixDbg.c */,
+				2C284F5B2E2D6C98008456BF /* NixMemMap.h */,
+				2C284F5C2E2D6C98008456BF /* NixMemMap.c */,
 				2CB909EC2E25A839009E9850 /* utilFilesList.h */,
 				2CB909EE2E267E91009E9850 /* utilLoadWav.h */,
 				2C606BF92E2020FC00FB8AB8 /* utilLoadWav.c */,
@@ -422,12 +448,9 @@
 		2C606C0F2E2025E000FB8AB8 /* tests */ = {
 			isa = PBXGroup;
 			children = (
-				2C606C122E20260800FB8AB8 /* testMemMap.h */,
-				2C606C132E20260800FB8AB8 /* testMemMap.c */,
-				2C606C112E20260800FB8AB8 /* testMemLeakMain.c */,
+				2C284F782E2E7C30008456BF /* NixTestSamplesConverter.h */,
+				2C284F792E2E7C30008456BF /* NixTestSamplesConverter.c */,
 				2C606C142E20260800FB8AB8 /* testSamplesConversion.c */,
-				2CB909ED2E267C1A009E9850 /* testSamplesConversionAndroid.c */,
-				2C606C152E20260800FB8AB8 /* testStress.c */,
 			);
 			path = tests;
 			sourceTree = "<group>";
@@ -435,11 +458,18 @@
 		2C606C102E2025E700FB8AB8 /* demos */ = {
 			isa = PBXGroup;
 			children = (
+				2C284F692E2D921F008456BF /* NixDemosCommon.h */,
+				2C284F6A2E2D921F008456BF /* NixDemosCommon.c */,
+				2C284F682E2D911A008456BF /* NixDemoPlayWav.h */,
+				2C284F702E2E64B0008456BF /* NixDemoPlayWav.c */,
+				2C284F722E2E717C008456BF /* NixDemoPlayStream.h */,
+				2C284F732E2E717C008456BF /* NixDemoPlayStream.c */,
+				2C284F752E2E742A008456BF /* NixDemoCaptureEco.h */,
+				2C284F762E2E742A008456BF /* NixDemoCaptureEco.c */,
 				2C606C172E20261700FB8AB8 /* demoPlayWav.c */,
-				2CB909EB2E254DFD009E9850 /* demoPlayWavAndroid.c */,
 				2CB90A032E281927009E9850 /* demoPlayStream.c */,
-				2CB90A152E2828D7009E9850 /* demoPlayStreamAndroid.c */,
 				2C606C162E20261700FB8AB8 /* demoCaptureEco.c */,
+				2CB909EB2E254DFD009E9850 /* demosAndroid.c */,
 			);
 			path = demos;
 			sourceTree = "<group>";
@@ -754,6 +784,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C284F5E2E2D6C98008456BF /* NixMemMap.c in Sources */,
+				2C284F642E2D7DF4008456BF /* NixDbg.c in Sources */,
+				2C284F6E2E2D921F008456BF /* NixDemosCommon.c in Sources */,
+				2C284F712E2E6529008456BF /* NixDemoPlayWav.c in Sources */,
 				2CB909EF2E268DCB009E9850 /* utilLoadWav.c in Sources */,
 				2C606C182E20264600FB8AB8 /* demoPlayWav.c in Sources */,
 			);
@@ -763,8 +797,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C284F602E2D6C98008456BF /* NixMemMap.c in Sources */,
 				2CB909F02E268DCB009E9850 /* utilLoadWav.c in Sources */,
 				2C606C192E20264C00FB8AB8 /* demoCaptureEco.c in Sources */,
+				2C284F6C2E2D921F008456BF /* NixDemosCommon.c in Sources */,
+				2C284F772E2E742A008456BF /* NixDemoCaptureEco.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -792,8 +829,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C284F7A2E2E7C30008456BF /* NixTestSamplesConverter.c in Sources */,
+				2C284F5D2E2D6C98008456BF /* NixMemMap.c in Sources */,
 				2CB909F22E268DCB009E9850 /* utilLoadWav.c in Sources */,
 				2C606C1B2E20266B00FB8AB8 /* testSamplesConversion.c in Sources */,
+				2C284F6F2E2D921F008456BF /* NixDemosCommon.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -801,9 +841,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C284F6B2E2D921F008456BF /* NixDemosCommon.c in Sources */,
+				2C284F5F2E2D6C98008456BF /* NixMemMap.c in Sources */,
 				2CB909F12E268DCB009E9850 /* utilLoadWav.c in Sources */,
-				2C606C1A2E20265400FB8AB8 /* testMemLeakMain.c in Sources */,
-				2CB909F32E268F32009E9850 /* testMemMap.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -811,6 +851,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C284F742E2E717C008456BF /* NixDemoPlayStream.c in Sources */,
+				2C284F612E2D6C98008456BF /* NixMemMap.c in Sources */,
+				2C284F652E2D7DF4008456BF /* NixDbg.c in Sources */,
+				2C284F6D2E2D921F008456BF /* NixDemosCommon.c in Sources */,
 				2CB90A102E28201C009E9850 /* utilLoadWav.c in Sources */,
 				2CB90A0F2E2819B3009E9850 /* demoPlayStream.c in Sources */,
 			);

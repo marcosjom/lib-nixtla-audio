@@ -41,10 +41,10 @@
 		2C606BE52E1FBF3900FB8AB8 /* nixtla-avfaudio.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "nixtla-avfaudio.m"; path = "../../../src/nixtla-avfaudio.m"; sourceTree = SOURCE_ROOT; };
 		2C82A75618C3B4E500DB9D37 /* nixtla-audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "nixtla-audio.c"; path = "../../../src/nixtla-audio.c"; sourceTree = SOURCE_ROOT; };
 		2C82A75718C3B4E500DB9D37 /* nixtla-audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "nixtla-audio.h"; path = "../../../include/nixtla-audio.h"; sourceTree = SOURCE_ROOT; };
-		2CB909F42E27AF12009E9850 /* nixtla-aaudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nixtla-aaudio.h"; path = "/Volumes/MacSSD_HFS/NIBSA_proyectos/CltMarcosOrtega/sys-auframework/lib-nixtla-audio-src/src/nixtla-aaudio.h"; sourceTree = "<absolute>"; };
-		2CB909F52E27AF12009E9850 /* nixtla-avfaudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nixtla-avfaudio.h"; path = "/Volumes/MacSSD_HFS/NIBSA_proyectos/CltMarcosOrtega/sys-auframework/lib-nixtla-audio-src/src/nixtla-avfaudio.h"; sourceTree = "<absolute>"; };
-		2CB909F82E27CB31009E9850 /* nixtla-openal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nixtla-openal.h"; path = "/Volumes/MacSSD_HFS/NIBSA_proyectos/CltMarcosOrtega/sys-auframework/lib-nixtla-audio-src/src/nixtla-openal.h"; sourceTree = "<absolute>"; };
-		2CB909F92E27CB31009E9850 /* nixtla-openal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "nixtla-openal.c"; path = "/Volumes/MacSSD_HFS/NIBSA_proyectos/CltMarcosOrtega/sys-auframework/lib-nixtla-audio-src/src/nixtla-openal.c"; sourceTree = "<absolute>"; };
+		2CB909F42E27AF12009E9850 /* nixtla-aaudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nixtla-aaudio.h"; path = "../../../src/nixtla-aaudio.h"; sourceTree = SOURCE_ROOT; };
+		2CB909F52E27AF12009E9850 /* nixtla-avfaudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nixtla-avfaudio.h"; path = "../../../src/nixtla-avfaudio.h"; sourceTree = SOURCE_ROOT; };
+		2CB909F82E27CB31009E9850 /* nixtla-openal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nixtla-openal.h"; path = "../../../src/nixtla-openal.h"; sourceTree = SOURCE_ROOT; };
+		2CB909F92E27CB31009E9850 /* nixtla-openal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "nixtla-openal.c"; path = "../../../src/nixtla-openal.c"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
