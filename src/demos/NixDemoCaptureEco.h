@@ -15,7 +15,7 @@
 #ifndef NIX_DEMO_CAPTURE_ECO_H
 #define NIX_DEMO_CAPTURE_ECO_H
 
-#include "nixtla-audio.h"
+#include "nixaudio/nixtla-audio.h"
 #include "NixDemosCommon.h"
 
 #ifdef __cplusplus

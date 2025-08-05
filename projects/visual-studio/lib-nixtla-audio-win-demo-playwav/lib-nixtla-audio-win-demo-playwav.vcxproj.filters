@@ -7,15 +7,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\c\nixtla-audio.c">
-      <Filter>Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\c\demos\demoPlayWav.c">
+    <ClCompile Include="..\..\..\src\nixtla-audio.c">
       <Filter>Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\nixtla-audio.h">
+      <Filter>Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\nixtla-audio-private.h">
       <Filter>Files</Filter>
     </ClInclude>
   </ItemGroup>

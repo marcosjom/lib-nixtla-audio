@@ -14,7 +14,7 @@
 #ifndef NIX_DEMOS_COMMON_H
 #define NIX_DEMOS_COMMON_H
 
-#include "nixtla-audio.h"
+#include "nixaudio/nixtla-audio.h"
 #include "../utils/NixMemMap.h"
 
 #ifdef __ANDROID__

@@ -8,8 +8,8 @@
 #include <stdlib.h> //malloc
 #include <string.h> //memset
 
-#include "../nixtla-audio-private.h"
-#include "nixtla-audio.h"
+#include "../nixaudio/nixtla-audio-private.h"
+#include "nixaudio/nixtla-audio.h"
 #include "NixDbg.h"
 
 #if !defined(NIX_MUTEX_T) || !defined(NIX_MUTEX_INIT) || !defined(NIX_MUTEX_DESTROY) || !defined(NIX_MUTEX_LOCK) || !defined(NIX_MUTEX_UNLOCK)

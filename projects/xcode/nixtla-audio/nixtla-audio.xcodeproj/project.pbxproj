@@ -1,0 +1,436 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2C4C749118CE143700B67543 /* nixtla-audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C82A75618C3B4E500DB9D37 /* nixtla-audio.c */; };
+		2C4C74BC18CE146100B67543 /* nixtla-audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C82A75618C3B4E500DB9D37 /* nixtla-audio.c */; };
+		2C606BE42E1FBF2C00FB8AB8 /* nixtla-audio-private.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C606BE32E1FBF2C00FB8AB8 /* nixtla-audio-private.h */; };
+		2C606BE62E1FBF3900FB8AB8 /* nixtla-avfaudio.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C606BE52E1FBF3900FB8AB8 /* nixtla-avfaudio.m */; };
+		2C606BE72E1FBF3900FB8AB8 /* nixtla-avfaudio.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C606BE52E1FBF3900FB8AB8 /* nixtla-avfaudio.m */; };
+		2CB909F62E27AF12009E9850 /* nixtla-aaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CB909F42E27AF12009E9850 /* nixtla-aaudio.h */; };
+		2CB909F72E27AF12009E9850 /* nixtla-avfaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CB909F52E27AF12009E9850 /* nixtla-avfaudio.h */; };
+		2CB909FA2E27CB31009E9850 /* nixtla-openal.c in Sources */ = {isa = PBXBuildFile; fileRef = 2CB909F92E27CB31009E9850 /* nixtla-openal.c */; };
+		2CB909FB2E27CB31009E9850 /* nixtla-openal.c in Sources */ = {isa = PBXBuildFile; fileRef = 2CB909F92E27CB31009E9850 /* nixtla-openal.c */; };
+		2CB909FC2E27CB31009E9850 /* nixtla-openal.h in Headers */ = {isa = PBXBuildFile; fileRef = 2CB909F82E27CB31009E9850 /* nixtla-openal.h */; };
+		2CF65E1E2E22647700743A55 /* nixtla-aaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C4D4DFF2E218128009AA203 /* nixtla-aaudio.c */; };
+		2CF65E1F2E22647700743A55 /* nixtla-aaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 2C4D4DFF2E218128009AA203 /* nixtla-aaudio.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		2C4C749418CE144A00B67543 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		2C4C748D18CE142D00B67543 /* libnixtla-audio-osx.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libnixtla-audio-osx.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C4C749618CE144A00B67543 /* libnixtla-audio-ios.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libnixtla-audio-ios.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C4D4DFF2E218128009AA203 /* nixtla-aaudio.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "nixtla-aaudio.c"; path = "../../../src/nixaudio/nixtla-aaudio.c"; sourceTree = SOURCE_ROOT; };
+		2C606BE32E1FBF2C00FB8AB8 /* nixtla-audio-private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nixtla-audio-private.h"; path = "../../../src/nixaudio/nixtla-audio-private.h"; sourceTree = SOURCE_ROOT; };
+		2C606BE52E1FBF3900FB8AB8 /* nixtla-avfaudio.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "nixtla-avfaudio.m"; path = "../../../src/nixaudio/nixtla-avfaudio.m"; sourceTree = SOURCE_ROOT; };
+		2C82A75618C3B4E500DB9D37 /* nixtla-audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "nixtla-audio.c"; path = "../../../src/nixaudio/nixtla-audio.c"; sourceTree = SOURCE_ROOT; };
+		2C82A75718C3B4E500DB9D37 /* nixtla-audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "nixtla-audio.h"; path = "../../../include/nixaudio/nixtla-audio.h"; sourceTree = SOURCE_ROOT; };
+		2CAD71D52E420C7500F8B6FB /* NixDbg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixDbg.h; path = ../../../src/utils/NixDbg.h; sourceTree = SOURCE_ROOT; };
+		2CAD71D62E420C7500F8B6FB /* NixDbg.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixDbg.c; path = ../../../src/utils/NixDbg.c; sourceTree = SOURCE_ROOT; };
+		2CAD71D72E420C7500F8B6FB /* NixMemMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixMemMap.h; path = ../../../src/utils/NixMemMap.h; sourceTree = SOURCE_ROOT; };
+		2CAD71D82E420C7500F8B6FB /* NixMemMap.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixMemMap.c; path = ../../../src/utils/NixMemMap.c; sourceTree = SOURCE_ROOT; };
+		2CAD71D92E420C7500F8B6FB /* utilFilesList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = utilFilesList.h; path = ../../../src/utils/utilFilesList.h; sourceTree = SOURCE_ROOT; };
+		2CAD71DA2E420C7500F8B6FB /* utilLoadWav.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = utilLoadWav.h; path = ../../../src/utils/utilLoadWav.h; sourceTree = SOURCE_ROOT; };
+		2CAD71DB2E420C7500F8B6FB /* utilLoadWav.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = utilLoadWav.c; path = ../../../src/utils/utilLoadWav.c; sourceTree = SOURCE_ROOT; };
+		2CAD71DD2E420C8200F8B6FB /* demoCaptureEco.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demoCaptureEco.c; path = ../../../src/demos/demoCaptureEco.c; sourceTree = SOURCE_ROOT; };
+		2CAD71DE2E420C8200F8B6FB /* demoPlayStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demoPlayStream.c; path = ../../../src/demos/demoPlayStream.c; sourceTree = SOURCE_ROOT; };
+		2CAD71DF2E420C8200F8B6FB /* demoPlayWav.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demoPlayWav.c; path = ../../../src/demos/demoPlayWav.c; sourceTree = SOURCE_ROOT; };
+		2CAD71E02E420C8200F8B6FB /* demosAndroid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = demosAndroid.c; path = ../../../src/demos/demosAndroid.c; sourceTree = SOURCE_ROOT; };
+		2CAD71E12E420C8200F8B6FB /* NixDemoCaptureEco.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixDemoCaptureEco.h; path = ../../../src/demos/NixDemoCaptureEco.h; sourceTree = SOURCE_ROOT; };
+		2CAD71E22E420C8200F8B6FB /* NixDemoCaptureEco.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixDemoCaptureEco.c; path = ../../../src/demos/NixDemoCaptureEco.c; sourceTree = SOURCE_ROOT; };
+		2CAD71E32E420C8200F8B6FB /* NixDemoPlayStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixDemoPlayStream.h; path = ../../../src/demos/NixDemoPlayStream.h; sourceTree = SOURCE_ROOT; };
+		2CAD71E42E420C8200F8B6FB /* NixDemoPlayStream.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixDemoPlayStream.c; path = ../../../src/demos/NixDemoPlayStream.c; sourceTree = SOURCE_ROOT; };
+		2CAD71E52E420C8200F8B6FB /* NixDemoPlayWav.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixDemoPlayWav.h; path = ../../../src/demos/NixDemoPlayWav.h; sourceTree = SOURCE_ROOT; };
+		2CAD71E62E420C8200F8B6FB /* NixDemoPlayWav.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixDemoPlayWav.c; path = ../../../src/demos/NixDemoPlayWav.c; sourceTree = SOURCE_ROOT; };
+		2CAD71E72E420C8200F8B6FB /* NixDemosCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixDemosCommon.h; path = ../../../src/demos/NixDemosCommon.h; sourceTree = SOURCE_ROOT; };
+		2CAD71E82E420C8200F8B6FB /* NixDemosCommon.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixDemosCommon.c; path = ../../../src/demos/NixDemosCommon.c; sourceTree = SOURCE_ROOT; };
+		2CAD71EA2E420C9600F8B6FB /* NixTestSamplesConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NixTestSamplesConverter.h; path = ../../../src/tests/NixTestSamplesConverter.h; sourceTree = SOURCE_ROOT; };
+		2CAD71EB2E420C9600F8B6FB /* NixTestSamplesConverter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = NixTestSamplesConverter.c; path = ../../../src/tests/NixTestSamplesConverter.c; sourceTree = SOURCE_ROOT; };
+		2CAD71EC2E420C9600F8B6FB /* testSamplesConversion.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = testSamplesConversion.c; path = ../../../src/tests/testSamplesConversion.c; sourceTree = SOURCE_ROOT; };
+		2CB909F42E27AF12009E9850 /* nixtla-aaudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nixtla-aaudio.h"; path = "../../../src/nixaudio/nixtla-aaudio.h"; sourceTree = SOURCE_ROOT; };
+		2CB909F52E27AF12009E9850 /* nixtla-avfaudio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nixtla-avfaudio.h"; path = "../../../src/nixaudio/nixtla-avfaudio.h"; sourceTree = SOURCE_ROOT; };
+		2CB909F82E27CB31009E9850 /* nixtla-openal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "nixtla-openal.h"; path = "../../../src/nixaudio/nixtla-openal.h"; sourceTree = SOURCE_ROOT; };
+		2CB909F92E27CB31009E9850 /* nixtla-openal.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "nixtla-openal.c"; path = "../../../src/nixaudio/nixtla-openal.c"; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2C4C748A18CE142D00B67543 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2C4C749318CE144A00B67543 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2C82A74518C3B4CC00DB9D37 = {
+			isa = PBXGroup;
+			children = (
+				2C82A75518C3B4D400DB9D37 /* nixaudio */,
+				2CAD71ED2E420C9600F8B6FB /* tests */,
+				2CAD71E92E420C8200F8B6FB /* demos */,
+				2CAD71DC2E420C7500F8B6FB /* utils */,
+				2C82A74F18C3B4CC00DB9D37 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2C82A74F18C3B4CC00DB9D37 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2C4C748D18CE142D00B67543 /* libnixtla-audio-osx.a */,
+				2C4C749618CE144A00B67543 /* libnixtla-audio-ios.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2C82A75518C3B4D400DB9D37 /* nixaudio */ = {
+			isa = PBXGroup;
+			children = (
+				2C82A75718C3B4E500DB9D37 /* nixtla-audio.h */,
+				2C82A75618C3B4E500DB9D37 /* nixtla-audio.c */,
+				2C606BE32E1FBF2C00FB8AB8 /* nixtla-audio-private.h */,
+				2CB909F82E27CB31009E9850 /* nixtla-openal.h */,
+				2CB909F92E27CB31009E9850 /* nixtla-openal.c */,
+				2CB909F42E27AF12009E9850 /* nixtla-aaudio.h */,
+				2C4D4DFF2E218128009AA203 /* nixtla-aaudio.c */,
+				2CB909F52E27AF12009E9850 /* nixtla-avfaudio.h */,
+				2C606BE52E1FBF3900FB8AB8 /* nixtla-avfaudio.m */,
+			);
+			name = nixaudio;
+			path = ../../../src/nixaudio;
+			sourceTree = SOURCE_ROOT;
+		};
+		2CAD71DC2E420C7500F8B6FB /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				2CAD71D52E420C7500F8B6FB /* NixDbg.h */,
+				2CAD71D62E420C7500F8B6FB /* NixDbg.c */,
+				2CAD71D72E420C7500F8B6FB /* NixMemMap.h */,
+				2CAD71D82E420C7500F8B6FB /* NixMemMap.c */,
+				2CAD71D92E420C7500F8B6FB /* utilFilesList.h */,
+				2CAD71DA2E420C7500F8B6FB /* utilLoadWav.h */,
+				2CAD71DB2E420C7500F8B6FB /* utilLoadWav.c */,
+			);
+			name = utils;
+			path = ../../../src/utils;
+			sourceTree = SOURCE_ROOT;
+		};
+		2CAD71E92E420C8200F8B6FB /* demos */ = {
+			isa = PBXGroup;
+			children = (
+				2CAD71DD2E420C8200F8B6FB /* demoCaptureEco.c */,
+				2CAD71DE2E420C8200F8B6FB /* demoPlayStream.c */,
+				2CAD71DF2E420C8200F8B6FB /* demoPlayWav.c */,
+				2CAD71E02E420C8200F8B6FB /* demosAndroid.c */,
+				2CAD71E12E420C8200F8B6FB /* NixDemoCaptureEco.h */,
+				2CAD71E22E420C8200F8B6FB /* NixDemoCaptureEco.c */,
+				2CAD71E32E420C8200F8B6FB /* NixDemoPlayStream.h */,
+				2CAD71E42E420C8200F8B6FB /* NixDemoPlayStream.c */,
+				2CAD71E52E420C8200F8B6FB /* NixDemoPlayWav.h */,
+				2CAD71E62E420C8200F8B6FB /* NixDemoPlayWav.c */,
+				2CAD71E72E420C8200F8B6FB /* NixDemosCommon.h */,
+				2CAD71E82E420C8200F8B6FB /* NixDemosCommon.c */,
+			);
+			name = demos;
+			path = ../../../src/demos;
+			sourceTree = SOURCE_ROOT;
+		};
+		2CAD71ED2E420C9600F8B6FB /* tests */ = {
+			isa = PBXGroup;
+			children = (
+				2CAD71EA2E420C9600F8B6FB /* NixTestSamplesConverter.h */,
+				2CAD71EB2E420C9600F8B6FB /* NixTestSamplesConverter.c */,
+				2CAD71EC2E420C9600F8B6FB /* testSamplesConversion.c */,
+			);
+			name = tests;
+			path = ../../../src/tests;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		2C4C748B18CE142D00B67543 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2CB909F62E27AF12009E9850 /* nixtla-aaudio.h in Headers */,
+				2CB909FC2E27CB31009E9850 /* nixtla-openal.h in Headers */,
+				2CB909F72E27AF12009E9850 /* nixtla-avfaudio.h in Headers */,
+				2C606BE42E1FBF2C00FB8AB8 /* nixtla-audio-private.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		2C4C748C18CE142D00B67543 /* nixtla-audio-osx */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2C4C749018CE142D00B67543 /* Build configuration list for PBXNativeTarget "nixtla-audio-osx" */;
+			buildPhases = (
+				2C4C748918CE142D00B67543 /* Sources */,
+				2C4C748A18CE142D00B67543 /* Frameworks */,
+				2C4C748B18CE142D00B67543 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "nixtla-audio-osx";
+			productName = "nixtla-audio-osx";
+			productReference = 2C4C748D18CE142D00B67543 /* libnixtla-audio-osx.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		2C4C749518CE144A00B67543 /* nixtla-audio-ios */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2C4C74B618CE144A00B67543 /* Build configuration list for PBXNativeTarget "nixtla-audio-ios" */;
+			buildPhases = (
+				2C4C749218CE144A00B67543 /* Sources */,
+				2C4C749318CE144A00B67543 /* Frameworks */,
+				2C4C749418CE144A00B67543 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "nixtla-audio-ios";
+			productName = "nixtla-audio-ios";
+			productReference = 2C4C749618CE144A00B67543 /* libnixtla-audio-ios.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2C82A74618C3B4CC00DB9D37 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0500;
+				ORGANIZATIONNAME = NIBSA;
+			};
+			buildConfigurationList = 2C82A74918C3B4CC00DB9D37 /* Build configuration list for PBXProject "nixtla-audio" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				en,
+			);
+			mainGroup = 2C82A74518C3B4CC00DB9D37;
+			productRefGroup = 2C82A74F18C3B4CC00DB9D37 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2C4C748C18CE142D00B67543 /* nixtla-audio-osx */,
+				2C4C749518CE144A00B67543 /* nixtla-audio-ios */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2C4C748918CE142D00B67543 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2CB909FB2E27CB31009E9850 /* nixtla-openal.c in Sources */,
+				2CF65E1E2E22647700743A55 /* nixtla-aaudio.c in Sources */,
+				2C606BE62E1FBF3900FB8AB8 /* nixtla-avfaudio.m in Sources */,
+				2C4C749118CE143700B67543 /* nixtla-audio.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2C4C749218CE144A00B67543 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2CB909FA2E27CB31009E9850 /* nixtla-openal.c in Sources */,
+				2CF65E1F2E22647700743A55 /* nixtla-aaudio.c in Sources */,
+				2C606BE72E1FBF3900FB8AB8 /* nixtla-avfaudio.m in Sources */,
+				2C4C74BC18CE146100B67543 /* nixtla-audio.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2C4C748E18CE142D00B67543 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		2C4C748F18CE142D00B67543 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		2C4C74B718CE144A00B67543 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				DSTROOT = /tmp/nixtla_audio_ios.dst;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		2C4C74B818CE144A00B67543 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				DSTROOT = /tmp/nixtla_audio_ios.dst;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		2C82A75018C3B4CC00DB9D37 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../include";
+			};
+			name = Debug;
+		};
+		2C82A75118C3B4CC00DB9D37 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../include";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2C4C749018CE142D00B67543 /* Build configuration list for PBXNativeTarget "nixtla-audio-osx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2C4C748E18CE142D00B67543 /* Debug */,
+				2C4C748F18CE142D00B67543 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2C4C74B618CE144A00B67543 /* Build configuration list for PBXNativeTarget "nixtla-audio-ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2C4C74B718CE144A00B67543 /* Debug */,
+				2C4C74B818CE144A00B67543 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2C82A74918C3B4CC00DB9D37 /* Build configuration list for PBXProject "nixtla-audio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2C82A75018C3B4CC00DB9D37 /* Debug */,
+				2C82A75118C3B4CC00DB9D37 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2C82A74618C3B4CC00DB9D37 /* Project object */;
+}

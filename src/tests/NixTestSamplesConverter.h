@@ -14,7 +14,7 @@
 #ifndef NIX_TEST_SAMPLES_CONVERTER_H
 #define NIX_TEST_SAMPLES_CONVERTER_H
 
-#include "nixtla-audio.h"
+#include "nixaudio/nixtla-audio.h"
 #include "../demos/NixDemosCommon.h"
 
 #ifdef __cplusplus

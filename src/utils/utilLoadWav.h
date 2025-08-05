@@ -12,7 +12,7 @@
 #   include <jni.h>
 #endif
 
-#include "nixtla-audio.h"
+#include "nixaudio/nixtla-audio.h"
 
 #ifdef __cplusplus
 extern "C" {
